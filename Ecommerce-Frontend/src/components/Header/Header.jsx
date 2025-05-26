@@ -9,6 +9,7 @@ import { IoIosGitCompare } from "react-icons/io";
 import { FaRegHeart } from "react-icons/fa";
 import Tooltip from '@mui/material/Tooltip';
 import Search from '../Search/Search';
+import Navigation from '../Navigation/Navigation';
 
 
 
@@ -25,7 +26,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
     return (
         <header>
-            <div className='top-strip py-2 border-t-[1px] border-gray-250 border-b-[1px]'>
+            <div className='top-strip py-2 border-t-[1px] border-gray-200 border-b-[1px]'>
                 <div className='container'>
                     <div className='flex items-center justify-between'>
                         <div className='col1 w-[50%]'>
@@ -44,7 +45,7 @@ const Header = () => {
                 </div>
                 </div>
 
-        <div className='header py-3'>
+        <div className='header py-4 border-b-[1px] border-gray-200'>
             <div className='container flex items-center justify-between'>
                 <div className='col1 w-[25%]'>
                     <Link to={'/'} className='logo'>
@@ -69,7 +70,7 @@ const Header = () => {
                             </Tooltip>
                         </li>
 
-                         <li>
+                         <li className='list-none'>
                             <Tooltip title="Wishlist">
                              <IconButton aria-label="cart">
                             <StyledBadge badgeContent={4} color="secondary">
@@ -79,7 +80,7 @@ const Header = () => {
                             </Tooltip>
                         </li>
 
-                         <li>
+                         <li className='list-none'>
                             <Tooltip title="Cart">
                              <IconButton aria-label="cart">
                             <StyledBadge badgeContent={4} color="secondary">
@@ -94,6 +95,8 @@ const Header = () => {
 
 
         </div>
+
+        <Navigation/>
         </header>
 
     )
