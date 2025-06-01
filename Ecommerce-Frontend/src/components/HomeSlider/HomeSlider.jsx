@@ -1,6 +1,6 @@
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules'; // ✅ You missed this line
+import { Navigation, Autoplay } from 'swiper/modules'; // ✅ You missed this line
 
 import 'swiper/css'; // ✅ Required base Swiper styles
 import 'swiper/css/navigation'; // ✅ Required styles for navigation buttons
@@ -12,7 +12,11 @@ const HomeSlider = () => {
         <Swiper
         spaceBetween={10}
       navigation={true}
-      modules={[Navigation]} // ✅ Attach the module
+      modules={[Navigation, Autoplay]} // ✅ Attach the module
+      autoplay={{
+          delay: 2500,
+          disableOnInteraction: false,
+        }}
       className="mySwiper"
     >
       <SwiperSlide>

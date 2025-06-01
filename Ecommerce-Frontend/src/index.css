@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
+/* *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
+} */
 
 body{
   font-family: "Montserrat", sans-serif;
@@ -14,6 +14,20 @@ body{
   background: #f5f0f0;
   overflow-x: hidden;
 }
+
+::-webkit-scrollbar{
+  width: 8px !important;
+  height: 8px !important;
+}
+::-webkit-scrollbar-thumb{
+  background: #ff5252 !important;
+ 
+}
+
+::-webkit-scrollbar-track{
+  background: #fff !important;
+}
+
 
 .container {
   width: 90%;
@@ -63,6 +77,18 @@ nav ul button:hover {
 
 }
 
+.smlBtn .swiper-button-prev, .smlBtn .swiper-button-next{
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+}
+
+ .smlBtn .swiper-button-prev:after, .smlBtn .swiper-button-next:after{
+  font-size: 18px !important;
+  color: #000 !important;
+
+}
+
 .homeCatSlider{
   overflow: inherit !important;
 }
@@ -72,7 +98,7 @@ nav ul button:hover {
   min-width: 30px;
 }
 
-homeCatSlider .swiper-button-prev:after, .homeCatSlider .swiper-button-next:after{
+.homeCatSlider .swiper-button-prev:after, .homeCatSlider .swiper-button-next:after{
  font-size: 16px !important;
 }
 
@@ -98,5 +124,19 @@ homeCatSlider .swiper-button-prev:after, .homeCatSlider .swiper-button-next:afte
 .homeCatSlider .item:hover img {
 transform: scale(1.1);
 }
+
+
+.MuiTabs-indicator{
+  background-color: #ff5252 !important;
+}
+
+.MuiTab-textColorPrimary .Mui-selected{
+  color: #ff5252 !important;
+}
  
+.productSlider .swiper-wrapper{
+  padding:15px;
+  margin-left: -15px;
+  margin-right: -15px;
+}
 

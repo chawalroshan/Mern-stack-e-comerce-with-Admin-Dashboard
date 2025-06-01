@@ -1,14 +1,93 @@
-import React from 'react'
-import HomeSlider from '../../components/HomeSlider/HomeSlider'
-import HomeCatSlider from '../../components/HomeCatSlider/HomeCatslider'
+import React, { useState } from 'react';
+import HomeSlider from '../../components/HomeSlider/HomeSlider';
+import HomeCatSlider from '../../components/HomeCatSlider/HomeCatslider';
+import { LiaShippingFastSolid } from "react-icons/lia";
+import AdsBannerSlider from '../../components/AdsBannerSlider/AdsBannerSlider';
+
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import ProductSlider from '../../components/ProductSlider/ProductSlider';
 
 const Home = () => {
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <>
-     <HomeSlider />
-     <HomeCatSlider />
-    </>
-  )
-}
+      <HomeSlider />
+      <HomeCatSlider />
 
-export default Home
+      {/* Popular Products Section */}
+      <section className="bg-white py-8">
+        <div className="container">
+          <div className="flex items-center justify-between gap-4">
+            <div className="leftSec">
+              <h3 className="text-[20px] font-[600]">Popular Products</h3>
+              <p className="text-[14px] font-[400]">
+                Do not miss the current offers until the end of March.
+              </p>
+            </div>
+
+            <div className="rightSec">
+              <Box
+                sx={{
+                  maxWidth: { xs: 320, sm: 480 },
+                  bgcolor: 'background.paper',
+                }}
+              >
+                <Tabs
+                  value={value}
+                  onChange={handleChange}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  aria-label="scrollable auto tabs example"
+                >
+                  <Tab label="Fashion" />
+                  <Tab label="Electronics" />
+                  <Tab label="Bags" />
+                  <Tab label="Footwear" />
+                  <Tab label="Groceries" />
+                  <Tab label="Beauty" />
+                  <Tab label="Wellness" />
+                   <Tab label="Jewellery" />
+                </Tabs>
+              </Box>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Free Shipping Section */}
+      <section className="py-16 bg-[#f5f5f5]">
+        <div className="container">
+          <div className="freeShipping w-[80%] py-3 px-4 border border-[red] flex items-center justify-between rounded-md mb-7">
+            <div className="col1 flex items-center gap-4">
+              <LiaShippingFastSolid className="text-[50px]" />
+              <span className="text-[20px] font-[600] uppercase">Free Shipping</span>
+            </div>
+
+            <div className="col2">
+              <p className="mb-0 font-[500]">
+                Free Delivery Now On Your First Order and over $200
+              </p>
+            </div>
+
+            <p className="font-[600] text-[30px]">- Only $200*</p>
+          </div>
+
+          
+
+          <ProductSlider items={5}/>
+
+          <AdsBannerSlider items={4} />
+        </div>
+      </section>
+    </>
+  );
+};
+
+export default Home;
