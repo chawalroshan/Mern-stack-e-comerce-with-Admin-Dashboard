@@ -34,10 +34,27 @@ body{
   margin: auto;
 }
 
-.top-strip .link:hover {
+/* .top-strip .link:hover {
+  color: #ff5252;
+} */
+
+.link{
+  color: #000;
+  text-decoration: none !important;
+  font-weight: 500;
+}
+.link:hover {
   color: #ff5252;
 }
 
+.btn-org{
+  background: #ff5252 !important;
+  color: #fff !important;
+  font-weight: 500;
+  text-transform: capitalize !important;
+  padding: 7px 20px !important;
+  border-radius: 5px !important;
+}
 
 .MuiBadge-badge{
   background-color: #ff5252 !important;
@@ -140,3 +157,15 @@ transform: scale(1.1);
   margin-right: -15px;
 }
 
+footer form input::placeholder{
+  font-size: 14px !important;
+}
+
+.css-imrjgg-MuiButtonBase-root-MuiCheckbox-root.Mui-checked, .css-imrjgg-MuiButtonBase-root-MuiCheckbox-root.MuiCheckbox-indeterminate{
+  color: #ff5252 !important;
+}
+
+.MuiFormControlLabel-label{
+  font-size: 13px !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+}
