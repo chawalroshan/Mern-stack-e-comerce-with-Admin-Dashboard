@@ -13,6 +13,7 @@ const HomeSlider = () => {
         spaceBetween={10}
       navigation={true}
       modules={[Navigation, Autoplay]} // ✅ Attach the module
+      loop={true}
       autoplay={{
           delay: 2500,
           disableOnInteraction: false,

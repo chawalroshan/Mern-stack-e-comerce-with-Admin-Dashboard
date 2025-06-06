@@ -17,7 +17,8 @@ import 'swiper/css/pagination';
 // import required modules
 import { Navigation } from 'swiper/modules';
 import BlogItem from '../../components/BlogItem/BlogItem';
-import Footer from '../../components/Footer/Footer';
+import HomeSliderV2 from '../../components/HomeSliderV2/HomeSliderV2';
+import BannerBoxV2 from '../../components/BannerBoxV2/BannerBoxV2';
 
 const Home = () => {
   const [value, setValue] = useState(0);
@@ -29,6 +30,20 @@ const Home = () => {
   return (
     <>
       <HomeSlider />
+
+      {/* <section className='py-6'>
+        <div className="container flex gap-5">
+          <div className='part1 w-[70%]'>
+            <HomeSliderV2/>
+          </div>
+          <div className='part2 w-[30%] flex items-center justify-center'>
+            <BannerBoxV2 info='left' image={'https://serviceapi.spicezgold.com/download/1741664665391_1741497254110_New_Project_50.jpg'} />
+            <BannerBoxV2 info='right' image={'https://serviceapi.spicezgold.com/download/1741664496923_1737020250515_New_Project_47.jpg'} />
+            <div>
+            </div>
+          </div>
+        </div>
+      </section> */}
       <HomeCatSlider />
 
       {/* Popular Products Section */}
@@ -150,7 +165,7 @@ const Home = () => {
             </div>
           </section>
 
-          <Footer/>
+          
         </div>
       </section>
     </>

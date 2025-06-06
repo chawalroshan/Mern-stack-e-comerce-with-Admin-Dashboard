@@ -76,12 +76,12 @@ const Footer = () => {
             </div>
         
 
-        <div className='part2 w-[40%] flex pl-5 '>
+        <div className='part2 w-[30%] flex pl-5 '>
             <div className='part2_col1 w-[50%]'>
-                <h2 className='text-[20px] font-[600] mb-4'>Products</h2>
+                <h2 className='text-[20px] font-[600] mb-4 text-center'>Products</h2>
 
-                <ul className='list'>
-                    <li className='list-none text-[14px] w-full mb-2'>
+                <ul className='list flex flex-col items-start'>
+                    <li className='list-none text-[14px] w-full mb-2'> 
                         <Link to='/' className='link'> Price drop</Link>
                     </li>
                     <li className='list-none text-[14px] w-full mb-2'>

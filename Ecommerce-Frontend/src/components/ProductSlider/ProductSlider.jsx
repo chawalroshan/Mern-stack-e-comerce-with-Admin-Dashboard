@@ -13,6 +13,7 @@ const ProductSlider = (props) => {
         <Swiper
                 spaceBetween={props.items}
               navigation={true}
+              slidesPerView={6}
               modules={[Navigation, Autoplay]} // ✅ Attach the module
               autoplay={{
                   delay: 2500,
@@ -38,6 +39,40 @@ const ProductSlider = (props) => {
               <SwiperSlide className='max-w-[300px] mx-auto'>
                 <ProductItem />
               </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+              <SwiperSlide className='max-w-[300px] mx-auto'>
+                <ProductItem />
+              </SwiperSlide>
+
               <SwiperSlide className='max-w-[300px] mx-auto'>
                 <ProductItem />
               </SwiperSlide>
