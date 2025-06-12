@@ -56,6 +56,11 @@ body{
   border-radius: 5px !important;
 }
 
+.btn-lg{
+  font-size: 18px;
+  padding: 7px 20px !important;
+}
+
 .MuiBadge-badge{
   background-color: #ff5252 !important;
   
