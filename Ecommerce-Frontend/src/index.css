@@ -56,6 +56,10 @@ body{
   border-radius: 5px !important;
 }
 
+.btn-org:hover{
+  background: #212121 !important;
+}
+
 .btn-lg{
   font-size: 18px;
   padding: 7px 20px !important;
@@ -214,3 +218,53 @@ footer form input::placeholder{
   transition-duration: 2.1s;
 }
 
+.MuiCheckbox-root{
+  padding:6px !important;
+}
+
+.ReactCollapse--collapse {
+  transition: height 400ms;
+}
+
+#range-slider .range-slider__thumb[data-lower] {
+  width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+#range-slider .range-slider__range {
+  border-radius: 6px;
+}
+
+.range-slider {
+  height: 5px !important;
+}
+
+.range-slider .range-slider__thumb {
+  width: 14px !important;
+  height: 14px !important;
+  background: #ff5252 !important;
+}
+
+.range-slider .range-slider__thumb,
+.range-slider__range {
+  background: #ff5252 !important;
+}
+
+.itemViewActions button.active svg{
+  color: #ff5252 !important;
+  opacity: 1 !important;
+
+}
+
+.itemViewActions button svg:hover,
+.itemViewActions button.active svg:hover {
+  transform: rotate(360deg) scale(1.2);
+  transition: transform 0.4s ease;
+  transition-delay: 0.2s;
+}
+
+.Mui-selected.MuiPaginationItem-page{
+  background: #ff5252 !important;
+  color: #fff !important;
+}
