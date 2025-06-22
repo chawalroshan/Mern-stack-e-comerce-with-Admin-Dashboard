@@ -1,11 +1,8 @@
 import React from 'react'
-import { Swiper, SwiperSlide } from 'swiper/react';
 import { Link } from 'react-router-dom';
-
-// Import Swiper styles
+import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
-// import required modules
 import { Navigation } from 'swiper/modules';
 
 const HomeCatSlider = () => {

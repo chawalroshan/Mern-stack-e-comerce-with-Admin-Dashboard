@@ -30,20 +30,20 @@ const ProductItemListView = () => {
                 {/* ✅ FIXED: h[35px] → h-[35px] */}
                 <div className='actions absolute top-[-200px] right-[5px] z-50 flex items-center gap-2 flex-col w-[50px] transition-all duration-300 group-hover:top-[10px] opacity-0 group-hover:opacity-100'>
                      <Tooltip title="View Product Details" placement="left-start">
-                    <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white text-black hover:bg-primary hover:text-white group '> 
+                    <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:bg-primary hover:text-white group '> 
                         <MdZoomOutMap className='text-[18px] text-black group-hover:text-white hover:!text-white'/> 
                     </Button></Tooltip>
-                    <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white text-black hover:bg-primary hover:text-white group '> 
+                    <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:bg-primary hover:text-white group '> 
                         <IoIosGitCompare className='text-[18px] text-black group-hover:text-white  hover:!text-white'/> 
                     </Button>
-                    <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white text-black hover:bg-primary hover:text-white group '> 
+                    <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:bg-primary hover:text-white group '> 
                         <FaRegHeart className='text-[18px] text-black group-hover:text-white  hover:!text-white'/> 
                     </Button>
                 </div>
             </div>
 
             <div className='info p-5 py-5 px-8  w-[75%] '>
-                <h6 className='text-[15px] font'> 
+                <h6 className='text-[15px] !font-[400]'> 
                     <Link to='/' className='link transition-all'>Soylent Green</Link>
                 </h6>
 
