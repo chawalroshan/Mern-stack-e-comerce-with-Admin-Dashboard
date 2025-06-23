@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './style.css';
 import { Link } from 'react-router-dom';
 import Rating from '@mui/material/Rating';
@@ -7,8 +7,12 @@ import { FaRegHeart } from "react-icons/fa";
 import { IoIosGitCompare } from "react-icons/io";
 import { MdZoomOutMap } from "react-icons/md";
 import Tooltip from '@mui/material/Tooltip';
+import { MyContext } from '../../App';
 
 const ProductItem = () => {
+
+    const context = useContext(MyContext);
+
     return (
         <div className='productItem shadow-lg rounded-md overflow-hidden border-1 border-[rgba(0,0,0,0.1)]'>
             <div className='group imageWrapper w-[100%] h-[220px] overflow-hidden rounded-md relative '>
@@ -28,7 +32,7 @@ const ProductItem = () => {
                 {/* ✅ FIXED: h[35px] → h-[35px] */}
                 <div className='actions absolute top-[-200px] right-[5px] z-50 flex items-center gap-3 flex-col w-[50px] transition-all duration-300 group-hover:top-[10px] opacity-0 group-hover:opacity-100'>
                     <Tooltip title="View Product Details" placement="left-start">
-                        <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:!bg-primary hover:!text-white group'>
+                        <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:!bg-primary hover:!text-white group' onClick={() => context.setOpenProductDetailsModal(true)}>
                             <MdZoomOutMap className='text-[18px]' />
                         </Button>
                         </Tooltip>
