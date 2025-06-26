@@ -17,9 +17,19 @@ import ProductZoom from './components/ProductZoom/ProductZoom'
 import { IoClose } from "react-icons/io5"
 import ProductDetailsComponent from './components/ProductDetails/ProductDetails'
 
+
 const MyContext = createContext();
 
 function App() {
+
+
+  const [openCartPanel, setOpenCartPanel] = useState(true);
+
+  const toggleCartPanel = (newOpen) => () => {
+    setOpenCartPanel(newOpen);
+  };
+
+
   const [openProductDetailsModal, setOpenProductDetailsModal] = useState(false);
   const [maxWidth, setMaxWidth] = useState('lg');
   const [fullWidth, setFullWidth] = useState(true);
@@ -32,47 +42,56 @@ function App() {
   const values = {
     setOpenProductDetailsModal,
     openProductDetailsModal,
+    setOpenCartPanel,
+    openCartPanel,
+    toggleCartPanel,
   };
 
   return (
-    <BrowserRouter>
-      <MyContext.Provider value={values}>
-        <Header />
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/productListing' element={<ProductListing />} />
-          <Route path='/product/:id' element={<ProductDetails />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
-        </Routes>
-        <Footer />
+    <>
+      <BrowserRouter>
+        <MyContext.Provider value={values}>
+          <Header />
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/productListing' element={<ProductListing />} />
+            <Route path='/product/:id' element={<ProductDetails />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/register' element={<Register />} />
+          </Routes>
+          <Footer />
 
-        <Dialog
-          open={openProductDetailsModal}
-          onClose={handleCloseProductDetailsModal}
-          maxWidth={maxWidth}
-          fullWidth={fullWidth}
-          className='productDetailsModal'
-        >
-          <DialogContent>
-            <div className='flex items-center w-full productDetailsModalContainer relative'>
-              <Button
-                className='!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !text-[black] !absolute top-[0px] right-[0px] !bg-[#f1f1f1]'
-                onClick={handleCloseProductDetailsModal}
-              >
-                <IoClose className='text-[22px]' />
-              </Button>
-              <div className="col1 w-[40%]">
-                <ProductZoom />
+          <Dialog
+            open={openProductDetailsModal}
+            onClose={handleCloseProductDetailsModal}
+            maxWidth={maxWidth}
+            fullWidth={fullWidth}
+            className='productDetailsModal'
+          >
+            <DialogContent>
+              <div className='flex items-center w-full productDetailsModalContainer relative'>
+                <Button
+                  className='!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !text-[black] !absolute top-[0px] right-[0px] !bg-[#f1f1f1]'
+                  onClick={handleCloseProductDetailsModal}
+                >
+                  <IoClose className='text-[22px]' />
+                </Button>
+                <div className="col1 w-[40%]">
+                  <ProductZoom />
+                </div>
+                <div className="col2 w-[60%] py-8 px-8 pr-16 productContent">
+                  <ProductDetailsComponent />
+                </div>
               </div>
-              <div className="col2 w-[60%] py-8 px-8 pr-16 productContent">
-                <ProductDetailsComponent />
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </MyContext.Provider>
-    </BrowserRouter>
+            </DialogContent>
+          </Dialog>
+        </MyContext.Provider>
+      </BrowserRouter>
+
+
+      
+
+    </>
   );
 }
 
