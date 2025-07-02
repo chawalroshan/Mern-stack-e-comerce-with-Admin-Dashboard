@@ -20,6 +20,7 @@ import Cart from './Pages/Cart/Cart'
 import Verify from './Pages/Verify/Verify'
 import toast, { Toaster } from 'react-hot-toast';
 import ForgetPassword from './Pages/ForgetPassword/Forgetpassword'
+import Checkout from './Pages/Checkout/Checkout'
 
 
 const MyContext = createContext();
@@ -27,7 +28,7 @@ const MyContext = createContext();
 function App() {
 
 
-  const [openCartPanel, setOpenCartPanel] = useState(true);
+  const [openCartPanel, setOpenCartPanel] = useState(false);
 
   const toggleCartPanel = (newOpen) => () => {
     setOpenCartPanel(newOpen);
@@ -76,6 +77,7 @@ const openAlertBox = (staus, msg) => {
             <Route path='/cart' element={<Cart />} />
             <Route path='/verify' element={<Verify />} />
             <Route path='/forget-password' element={<ForgetPassword/>} />
+            <Route path='/checkout' element={<Checkout/>} />
            
 
           </Routes>
