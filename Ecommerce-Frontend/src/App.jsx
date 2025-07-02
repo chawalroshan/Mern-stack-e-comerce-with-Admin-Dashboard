@@ -16,6 +16,10 @@ import DialogContent from '@mui/material/DialogContent'
 import ProductZoom from './components/ProductZoom/ProductZoom'
 import { IoClose } from "react-icons/io5"
 import ProductDetailsComponent from './components/ProductDetails/ProductDetails'
+import Cart from './Pages/Cart/Cart'
+import Verify from './Pages/Verify/Verify'
+import toast, { Toaster } from 'react-hot-toast';
+import ForgetPassword from './Pages/ForgetPassword/Forgetpassword'
 
 
 const MyContext = createContext();
@@ -38,6 +42,16 @@ function App() {
     setOpenProductDetailsModal(false);
   };
 
+const openAlertBox = (staus, msg) => {
+  if(staus==='sucess'){
+    toast.success(msg);
+  }
+  if(staus==='sucess'){
+    toast.error(msg);
+  }
+
+}
+
   // ✅ Now this line is safe
   const values = {
     setOpenProductDetailsModal,
@@ -45,6 +59,7 @@ function App() {
     setOpenCartPanel,
     openCartPanel,
     toggleCartPanel,
+    openAlertBox,
   };
 
   return (
@@ -58,8 +73,15 @@ function App() {
             <Route path='/product/:id' element={<ProductDetails />} />
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
+            <Route path='/cart' element={<Cart />} />
+            <Route path='/verify' element={<Verify />} />
+            <Route path='/forget-password' element={<ForgetPassword/>} />
+           
+
           </Routes>
           <Footer />
+
+          <Toaster/>
 
           <Dialog
             open={openProductDetailsModal}

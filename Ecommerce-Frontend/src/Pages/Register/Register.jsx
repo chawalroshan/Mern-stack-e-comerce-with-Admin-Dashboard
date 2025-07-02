@@ -35,7 +35,7 @@ const Register = () => {
                         </div>
 
 
-                        <div className='flex items-center w-full mt-3 -mb-3'>
+                        <div className='flex items-center w-full mt-3 mb-3'>
                             <Button className='btn-org btn-lg w-full'>Register</Button>
 
                         </div>
