@@ -21,6 +21,8 @@ import Verify from './Pages/Verify/Verify'
 import toast, { Toaster } from 'react-hot-toast';
 import ForgetPassword from './Pages/ForgetPassword/Forgetpassword'
 import Checkout from './Pages/Checkout/Checkout'
+import MyAccount from './Pages/MyAccount/MyAccount'
+import MyList from './Pages/MyList/MyList'
 
 
 const MyContext = createContext();
@@ -38,6 +40,7 @@ function App() {
   const [openProductDetailsModal, setOpenProductDetailsModal] = useState(false);
   const [maxWidth, setMaxWidth] = useState('lg');
   const [fullWidth, setFullWidth] = useState(true);
+  const [isLogin, setIsLogin] = useState(true);
 
   const handleCloseProductDetailsModal = () => {
     setOpenProductDetailsModal(false);
@@ -61,6 +64,8 @@ const openAlertBox = (staus, msg) => {
     openCartPanel,
     toggleCartPanel,
     openAlertBox,
+    isLogin,
+    setIsLogin,
   };
 
   return (
@@ -78,6 +83,8 @@ const openAlertBox = (staus, msg) => {
             <Route path='/verify' element={<Verify />} />
             <Route path='/forget-password' element={<ForgetPassword/>} />
             <Route path='/checkout' element={<Checkout/>} />
+            <Route path='/my-account' element={<MyAccount/>} />
+            <Route path='/my-list' element={<MyList/>} />
            
 
           </Routes>
