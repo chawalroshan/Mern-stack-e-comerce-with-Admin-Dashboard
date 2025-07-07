@@ -91,6 +91,10 @@ h1,h2.h3,h4,h5,h6{
   font-size: 18px;
   padding: 7px 20px !important;
 }
+.btn-sm{
+  font-size: 12px !important;
+  padding: 5px 20px !important;
+}
 
 .MuiBadge-badge{
   background-color: #ff5252 !important;
