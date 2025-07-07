@@ -156,7 +156,7 @@ const context = useContext(MyContext);
           <FaRegUser className='text-[18px]'/> <span className='text-[14px]'>My Account</span>
         </MenuItem>
         </Link>
-        <Link to='/my-orders' className='w-full block'>
+        <Link to='/orders' className='w-full block'>
         <MenuItem onClick={handleClose} className='flex gap-2 !py-2'>
           <IoBagCheckOutline className='text-[18px]'/> <span className='text-[14px]'>Orders</span>
         </MenuItem>

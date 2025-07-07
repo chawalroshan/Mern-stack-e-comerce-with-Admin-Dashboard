@@ -23,6 +23,7 @@ import ForgetPassword from './Pages/ForgetPassword/Forgetpassword'
 import Checkout from './Pages/Checkout/Checkout'
 import MyAccount from './Pages/MyAccount/MyAccount'
 import MyList from './Pages/MyList/MyList'
+import Orders from './Pages/Orders/Orders'
 
 
 const MyContext = createContext();
@@ -85,6 +86,7 @@ const openAlertBox = (staus, msg) => {
             <Route path='/checkout' element={<Checkout/>} />
             <Route path='/my-account' element={<MyAccount/>} />
             <Route path='/my-list' element={<MyList/>} />
+            <Route path='/orders' element={<Orders/>} />
            
 
           </Routes>

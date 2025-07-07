@@ -40,7 +40,9 @@ h1,h2.h3,h4,h5,h6{
   background: #fff !important;
 }
 
-
+.overflow-x-auto::-webkit-scrollbar-thumb{
+  background: #ccc !important;
+}
 .container {
   width: 95%;
   margin: auto;
