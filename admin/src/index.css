@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.MuiBadge-badge{
+    background: #ff5252 !important;
+}
+
+
+.ReactCollapse--collapse {
+  transition: height 500ms;
+}
