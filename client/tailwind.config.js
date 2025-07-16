@@ -10,7 +10,7 @@ export default {
         primary: '#ff5252',
       },
       backgroundColor: {
-        primary: '#ff5252', // ✅ Fixed: single # and consistent color
+        primary: '#ff5252', 
       }
     },
   },

@@ -1,3 +1,20 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f1f1f1f1;
+}
+
+
 .ReactCollapse--collapse {
   transition: height 300ms;
+}
+
+.btn-blue{
+  background: #2d72fd !important;
+  color: #fff !important;
+  padding: 8px 20px !important;
+}
+
+.btn-blue:hover {
+  background-color: #0a4aca !important;
+  color: #fff;
 }

@@ -15,8 +15,11 @@ function App() {
         <section className='main'>
           <Header/>
           <div className="containerMain flex ">
-            <div className="sidebarWrapper w-[25%]">
+            <div className="sidebarWrapper w-[20%]">
             <Sidebar/>
+            </div>
+            <div className="contentRight py-5 px-5 w-[82%]">
+              <Dashboard/>
             </div>
           </div>
         </section>
