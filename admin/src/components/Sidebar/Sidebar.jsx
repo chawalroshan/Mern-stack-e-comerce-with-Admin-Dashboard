@@ -1,5 +1,5 @@
 import Button from '@mui/material/Button';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { RxDashboard } from "react-icons/rx";
 import { FaRegImage } from "react-icons/fa";
@@ -10,16 +10,21 @@ import { IoBagCheckOutline } from "react-icons/io5";
 import { IoIosLogOut } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa";
 import { Collapse } from 'react-collapse';
+import { MyContext } from '../../App';
+
 
 const Sidebar = () => {
+    const context = useContext(MyContext);//context
     const [submenuIndex, setSubmenuIndex] = useState(null);
 
     const isOpenSubMenu = (index) => {
         setSubmenuIndex(submenuIndex === index ? null : index);
     };
 
+
     return (
-        <div className='sidebar fixed top-0 left-0 bg-[#f1f1f1] w-[15%] h-full border-r border-[rgba(0,0,0,0.1)] py-2 px-3'>
+        <div className={`sidebar fixed top-0 left-0 bg-[#f1f1f1] h-full border-r border-[rgba(0,0,0,0.1)] py-2 px-3 transition-all duration-300 ${context.isSidebarOpen ? 'w-[18%]' : 'w-0'}`}>
+
             <div className='py-2 w-full'>
                 <Link to='/'>
                     <img src='https://ecme-react.themenate.net/img/logo/logo-light-full.png' className='w-[120px]' alt="Logo" />

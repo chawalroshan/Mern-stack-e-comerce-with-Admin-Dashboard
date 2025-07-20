@@ -8,10 +8,17 @@ body {
   transition: height 300ms;
 }
 
+.btn{
+  padding: 8px 20px !important;
+  color: #fff !important;
+}
 .btn-blue{
   background: #2d72fd !important;
   color: #fff !important;
   padding: 8px 20px !important;
+}
+.btn-sm{
+  padding: 6px 20px !important;
 }
 
 .btn-blue:hover {

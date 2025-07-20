@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Button from '@mui/material/Button';
-import { RiMenu2Fill } from "react-icons/ri";
+import { AiOutlineMenuFold } from "react-icons/ai";
+import { AiOutlineMenuUnfold } from "react-icons/ai";
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
@@ -10,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import { FaRegUser } from "react-icons/fa6";
 import { IoIosLogOut } from "react-icons/io";
+import {MyContext} from '../../App'
 
 
 
@@ -34,10 +36,16 @@ const Header = () => {
   },
 }));
 
+const context = useContext (MyContext);
+
   return (
-    <header className='w-full py-2 pl-64 pr-7 bg-[#ffffff] flex items-center border-b border-[rgba(0,0,0,0.1)] justify-between shadow-md'>
-        <div className='part1'>
-        <Button className='!w-[40px] !h-[40px] !rounded-full !min-w-[40px]'><RiMenu2Fill className='text-[18px] !text-[rgba(0,0,0,0.8)]'/> </Button>
+    <header className={`w-full h-[auto] py-2 ${context.isSidebarOpen=== true ? 'pl-64' : 'pl-5'} shadow-md pr-7 bg-white flex items-center justify-between transition-all `}>
+        <div className='part1 z-10 left-10 relative'>
+        <Button className='!w-[40px] !h-[40px] !rounded-full !min-w-[40px] !text-[rgba(0,0,0,0.8)] !text-[18px]' onClick={() => context.setIsSidebarOpen(!context.isSidebarOpen)}>
+          {
+            context.isSidebarOpen===true ? <AiOutlineMenuFold className='!text-[18px] !text-[rgba(0,0,0,0.8)] '/> : <AiOutlineMenuUnfold className='!text-[18px] !text-[rgba(0,0,0,0.8)]' />
+          }
+           </Button>
         </div>
 
         <div className="part2 w-[40px] flex items-center justify-end gap-5">
