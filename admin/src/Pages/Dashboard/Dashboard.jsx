@@ -24,7 +24,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { BiExport } from "react-icons/bi";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid,Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 
@@ -113,6 +113,82 @@ const Dashboard = () => {
   };
 
   const [categoryFilterVal, setCategoryFilterVal] = useState('');
+
+  const [chart1Data, setChart1Data] = useState([
+    {
+      name: 'JAN',
+      ToptalSales: 4000,
+      TotalUsers: 2400,
+      amt: 2400,
+    },
+    {
+      name: 'FEB',
+      ToptalSales: 3000,
+      TotalUsers: 1398,
+      amt: 2210,
+    },
+    {
+      name: 'MARCH',
+      ToptalSales: 2000,
+      TotalUsers: 9800,
+      amt: 2290,
+    },
+    {
+      name: 'APRIL',
+      ToptalSales: 2780,
+      TotalUsers: 3908,
+      amt: 2000,
+    },
+    {
+      name: 'MAY',
+      ToptalSales: 1890,
+      TotalUsers: 4800,
+      amt: 2181,
+    },
+    {
+      name: 'JUNE',
+      ToptalSales: 2390,
+      TotalUsers: 3800,
+      amt: 2500,
+    },
+    {
+      name: 'JULY',
+      ToptalSales: 6490,
+      TotalUsers: 4300,
+      amt: 2100,
+    },
+    {
+      name: 'AUG',
+      ToptalSales: 3490,
+      TotalUsers: 430,
+      amt: 2100,
+    },
+    {
+      name: 'SEP',
+      ToptalSales: 4900,
+      TotalUsers: 3000,
+      amt: 2100,
+    },
+    {
+      name: 'OCT',
+      ToptalSales: 1900,
+      TotalUsers: 6300,
+      amt: 2100,
+    },
+    {
+      name: 'NOV',
+      ToptalSales: 1490,
+      TotalUsers: 7300,
+      amt: 2100,
+    },
+    {
+      name: 'DEC',
+      ToptalSales: 8190,
+      TotalUsers: 4300,
+      amt: 2100,
+    },
+
+  ]);
 
   const handleChangeCatFilter = (event) => {
     setCategoryFilterVal(event.target.value);
@@ -423,7 +499,7 @@ const Dashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {[1,2,3,4].map((row, idx) => (
+              {[1,2,3,4,5,6,7].map((row, idx) => (
                 <TableRow hover role="checkbox" tabIndex={-1} key={idx}>
                   <TableCell padding="checkbox">
                     <Checkbox {...label} size='small' />
@@ -564,6 +640,38 @@ const Dashboard = () => {
 
       </div>
 
+    
+      <div className="card my-4 shadow-md bg-white p-5 rounded-md">
+      <div class="flex items-center justify-between px-5 py-5">
+        <h2 class="text-[18px] font-bold  ">Total Users & Total Sales</h2>
+        </div>
+        <div class="flex items-center px-5 py-5 pt-0 gap-5">
+          <span className='flex items-center gap-2 text-[15px] '>
+            <span className='block w-[10px] h-[10px] rounded-full bg-green-600 '></span>Total User</span>
+
+            <span className='flex items-center gap-2 text-[15px] '>
+            <span className='block w-[10px] h-[10px] rounded-full bg-primary '></span>Total Sales</span>
+        </div>
+      <LineChart
+        width={1000}
+        height={500}
+        data={chart1Data}
+        margin={{
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="transparent"/>
+        <XAxis dataKey="name" tick={{fontSize: 12}} />
+        <YAxis tick={{fontSize: 12}}/>
+        <RechartsTooltip />
+        <Legend />
+        <Line type="monotone" dataKey="ToptalSales" stroke="#8884d8" activeDot={{ r: 8 }} strokeWidth={3} />
+        <Line type="monotone" dataKey="TotalUsers" stroke="#82ca9d" strokeWidth={3} />
+      </LineChart>
+        </div>
 
 
     </div>
