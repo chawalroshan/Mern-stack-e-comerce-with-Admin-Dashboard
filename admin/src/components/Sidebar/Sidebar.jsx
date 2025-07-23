@@ -27,7 +27,8 @@ const Sidebar = () => {
 
             <div className='py-2 w-full'>
                 <Link to='/'>
-                    <img src='https://ecme-react.themenate.net/img/logo/logo-light-full.png' className='w-[120px]' alt="Logo" />
+                    {/* <img src='https://ecme-react.themenate.net/img/logo/logo-light-full.png' className='w-[120px]' alt="Logo" /> */}
+                    <img src='/mannerLogo.png' className='w-[250px] p-0 m-0 ' alt="Logo" />
                 </Link>
             </div>
 

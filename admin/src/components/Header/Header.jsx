@@ -55,7 +55,10 @@ const context = useContext (MyContext);
       </StyledBadge>
     </IconButton>
 
-    <div className="relative">
+    {
+      context.isLogin === true ?
+
+      <div className="relative">
         <div className=' w-[35px] h-[35px] rounded-full' onClick={handleClickMyAcc}>
         <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIJzJUCo-RpJB0V8hJcNhjHSbddEkvk5hZJw&s' alt='user avtar' className='w-full h-full object-cover overflow-hidden cursor-pointer rounded-full'/>
 
@@ -121,6 +124,14 @@ const context = useContext (MyContext);
         
       </Menu>
     </div>
+
+        :
+
+        <Button className='btn-blue btn-sm !rounded-full '>Sign In</Button>
+
+    }
+
+    
         </div>
       
     </header>
