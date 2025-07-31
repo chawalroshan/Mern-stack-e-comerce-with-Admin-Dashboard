@@ -38,3 +38,13 @@ a.active button{
 .MuiButton-icon svg{
   font-size: 30px !important;
 }
+
+.MuiAppBar-colorPrimary{
+  background: #ec1b1b !important;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

@@ -19,16 +19,16 @@ const Signup = () => {
           <img src='/mannerLogo.png' className='w-[180px]' alt='Logo' />
         </Link>
         <div className='flex items-center gap-3'>
-          
-        <NavLink to='/login'>
-        <Button className='rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1'>
-          Login <RiLoginCircleLine className='text-[18px]' />
-        </Button>
-      </NavLink>
-            <NavLink to='/signup'>
-          <Button className='rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1'>
-            Sign Up <FaRegUser className='text-[15px]' />
-          </Button>
+
+          <NavLink to='/login'>
+            <Button className='rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1'>
+              Login <RiLoginCircleLine className='text-[18px]' />
+            </Button>
+          </NavLink>
+          <NavLink to='/signup'>
+            <Button className='rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1'>
+              Sign Up <FaRegUser className='text-[15px]' />
+            </Button>
           </NavLink>
         </div>
       </header>
@@ -49,11 +49,11 @@ const Signup = () => {
         </div>
 
         <h1 className='text-center text-[35px] font-extrabold text-[#0088de]'>
-  Join us today! <br />
-  <span className='font-bold text-black'>
-    Get special benefits and stay up-to-date.
-  </span>
-</h1>
+          Join us today! <br />
+          <span className='font-bold text-black'>
+            Get special benefits and stay up-to-date.
+          </span>
+        </h1>
 
 
         <div className='flex flex-wrap items-center justify-center mt-6 gap-4'>

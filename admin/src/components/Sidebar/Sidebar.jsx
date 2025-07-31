@@ -35,22 +35,22 @@ const Sidebar = () => {
             <ul className='list-none mt-4'>
                 <li>
                     <Link to='/'>
-                    <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'>
-                        <RxDashboard className='text-[18px]' />
-                        <span>Dashboard</span>
-                    </Button>
+                        <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'>
+                            <RxDashboard className='text-[18px]' />
+                            <span>Dashboard</span>
+                        </Button>
                     </Link>
                 </li>
 
                 <li>
-                    <Button 
+                    <Button
                         className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'
                         onClick={() => isOpenSubMenu(1)}
                     >
                         <FaRegImage className='text-[18px]' />
                         <span>Home Slides</span>
                         <span className='ml-auto flex items-center justify-center w-[30px] h-[30px]'>
-                            <FaAngleDown className={`transition-all ${submenuIndex ===1 ? 'rotate-180 ' : ''}` }/>
+                            <FaAngleDown className={`transition-all ${submenuIndex === 1 ? 'rotate-180 ' : ''}`} />
                         </span>
                     </Button>
 
@@ -74,10 +74,10 @@ const Sidebar = () => {
 
                 <li>
                     <Link to='/users'>
-                    <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'>
-                        <FiUsers className='text-[18px]' />
-                        <span>Users</span>
-                    </Button>
+                        <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'>
+                            <FiUsers className='text-[18px]' />
+                            <span>Users</span>
+                        </Button>
                     </Link>
                 </li>
 
@@ -85,26 +85,31 @@ const Sidebar = () => {
                     <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]' onClick={() => isOpenSubMenu(3)}>
                         <RiProductHuntLine className='text-[18px]' />
                         <span>Products</span>
-                        <span className='ml-auto flex items-center justify-center w-[30px] h-[30px]'><FaAngleDown className={`transition-all ${submenuIndex === 3 ? 'rotate-180 ' : ''}` }/></span>
-                        
+                        <span className='ml-auto flex items-center justify-center w-[30px] h-[30px]'><FaAngleDown className={`transition-all ${submenuIndex === 3 ? 'rotate-180 ' : ''}`} /></span>
+
                     </Button>
                     <Collapse isOpened={submenuIndex === 3} className='w-full'>
                         <ul className='w-full pl-4 mt-2 list-none'>
                             <li className='w-full'>
                                 <Link to='/products'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
-                                    <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
-                                    product List
-                                </Button>
+                                    <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                                        <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
+                                        product List
+                                    </Button>
                                 </Link>
                             </li>
                             <li className='w-full'>
-                                <Link to='/add-product'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
-                                    <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
-                                    product upload
-                                </Button>
-                                </Link>
+                                {/* <Link to='/add-product'> */}
+                                    <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3' onClick={() => context.setIsOpenFullScreenPanel(
+                                        {
+                                            open: true,
+                                            model: 'Add Product'
+                                        }
+                                    )}>
+                                        <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
+                                        product upload
+                                    </Button>
+                                {/* </Link> */}
                             </li>
                         </ul>
                     </Collapse>
@@ -114,40 +119,40 @@ const Sidebar = () => {
                     <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]' onClick={() => isOpenSubMenu(4)}>
                         <TbCategory className='text-[18px]' />
                         <span>Category</span>
-                        <span className='ml-auto flex items-center justify-center w-[30px] h-[30px]'><FaAngleDown  className={`transition-all ${submenuIndex === 4 ? 'rotate-180 ' : ''}` }/></span>
+                        <span className='ml-auto flex items-center justify-center w-[30px] h-[30px]'><FaAngleDown className={`transition-all ${submenuIndex === 4 ? 'rotate-180 ' : ''}`} /></span>
                     </Button>
-                     <Collapse isOpened={submenuIndex === 4} className='w-full'>
+                    <Collapse isOpened={submenuIndex === 4} className='w-full'>
                         <ul className='w-full pl-4 mt-2 list-none'>
                             <li className='w-full'>
                                 <Link to='/categories'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
-                                    <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
-                                    Category list 
-                                </Button>
+                                    <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                                        <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
+                                        Category list
+                                    </Button>
                                 </Link>
                             </li>
                             <li className='w-full'>
                                 <Link to='/category/add'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
-                                    <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
-                                    add a category
-                                </Button>
+                                    <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                                        <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
+                                        add a category
+                                    </Button>
                                 </Link>
                             </li>
                             <li className='w-full'>
                                 <Link to='/category/subCat'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
-                                    <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
-                                   sub category
-                                </Button>
+                                    <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                                        <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
+                                        sub category
+                                    </Button>
                                 </Link>
                             </li>
                             <li className='w-full'>
                                 <Link to='/category/subCat/add'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
-                                    <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
-                                    add a sub category
-                                </Button>
+                                    <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                                        <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
+                                        add a sub category
+                                    </Button>
                                 </Link>
                             </li>
                         </ul>
@@ -156,10 +161,10 @@ const Sidebar = () => {
 
                 <li>
                     <Link to='/orders'>
-                    <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'>
-                        <IoBagCheckOutline className='text-[18px]' />
-                        <span>Orders</span>
-                    </Button>
+                        <Button className='w-full !capitalize !justify-start flex items-center !gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500] !py-2 hover:!bg-[#f1f1f1]'>
+                            <IoBagCheckOutline className='text-[18px]' />
+                            <span>Orders</span>
+                        </Button>
                     </Link>
                 </li>
 
