@@ -25,6 +25,14 @@ import Slide from '@mui/material/Slide';
 // import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import AddProduct from './Pages/Products/AddProduct'
+import HomeSliderBanners from './Pages/HomeSliderBanners/HomeSliderBanners'
+import AddHomeSlide from './Pages/HomeSliderBanners/addHomeSlide'
+import Category from './Pages/Category/Category'
+import AddCategory from './Pages/Category/AddCategory'
+import AddSubCategory from './Pages/SubCategory/AddSubCategory'
+import SubCategoryList from './Pages/SubCategory/SubCategoryList'
+import Users from './Pages/Users/Users'
+import Orders from './Pages/Orders/Orders'
 
 const Transition = React.forwardRef(function Transition(
   props,
@@ -102,6 +110,101 @@ function App() {
         </>
       )
     },
+    {
+      path: '/homeSlider/list',
+      exact:true,
+      element: (
+        <>
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex ">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen===true ? 'w-[18%]' : 'w-[0px] opacity-0 '}  transition-all` } >
+            <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${isSidebarOpen=== false ? 'w-[100%]' : 'w-[82%]'} transition-all `}>
+              <HomeSliderBanners/>
+            </div>
+          </div>
+        </section>
+        </>
+      )
+    },
+    {
+      path: '/category/list',
+      exact:true,
+      element: (
+        <>
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex ">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen===true ? 'w-[18%]' : 'w-[0px] opacity-0 '}  transition-all` } >
+            <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${isSidebarOpen=== false ? 'w-[100%]' : 'w-[82%]'} transition-all `}>
+              <Category/>
+            </div>
+          </div>
+        </section>
+        </>
+      )
+    },
+    {
+      path: '/subCategory/list',
+      exact:true,
+      element: (
+        <>
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex ">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen===true ? 'w-[18%]' : 'w-[0px] opacity-0 '}  transition-all` } >
+            <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${isSidebarOpen=== false ? 'w-[100%]' : 'w-[82%]'} transition-all `}>
+              <SubCategoryList/>
+            </div>
+          </div>
+        </section>
+        </>
+      )
+    },
+    {
+      path: '/users',
+      exact:true,
+      element: (
+        <>
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex ">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen===true ? 'w-[18%]' : 'w-[0px] opacity-0 '}  transition-all` } >
+            <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${isSidebarOpen=== false ? 'w-[100%]' : 'w-[82%]'} transition-all `}>
+              <Users/>
+            </div>
+          </div>
+        </section>
+        </>
+      )
+    },
+    {
+      path: '/orders',
+      exact:true,
+      element: (
+        <>
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex ">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen===true ? 'w-[18%]' : 'w-[0px] opacity-0 '}  transition-all` } >
+            <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${isSidebarOpen=== false ? 'w-[100%]' : 'w-[82%]'} transition-all `}>
+              <Orders/>
+            </div>
+          </div>
+        </section>
+        </>
+      )
+    },
   ])
 
 
@@ -152,6 +255,15 @@ function App() {
         </AppBar>
        {
         isOpenFullScreenPanel?.model ==='Add Product' && <AddProduct/>
+       }
+       {
+        isOpenFullScreenPanel?.model ==='Add Home Slide' && <AddHomeSlide/>
+       }
+        {
+        isOpenFullScreenPanel?.model ==='Add New Category' && <AddCategory/>
+       }
+       {
+        isOpenFullScreenPanel?.model ==='Add New Sub Category' && <AddSubCategory/>
        }
       </Dialog>
 

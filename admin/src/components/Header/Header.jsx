@@ -127,7 +127,7 @@ const context = useContext (MyContext);
 
         :
 
-        <Button className='btn-blue btn-sm !rounded-full '>Sign In</Button>
+        <Button className='btn btn-blue btn-sm !rounded-full !text-[12px] '>Sign In</Button>
 
     }
 
