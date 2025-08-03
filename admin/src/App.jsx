@@ -33,6 +33,9 @@ import AddSubCategory from './Pages/SubCategory/AddSubCategory'
 import SubCategoryList from './Pages/SubCategory/SubCategoryList'
 import Users from './Pages/Users/Users'
 import Orders from './Pages/Orders/Orders'
+import Forgetpassword from './Pages/ForgetPassword/Forgetpassword'
+import VerifyAccount from './Pages/VerifyAccount/VerifyAccount'
+import ResetPassword from './Pages/ResetPassword/ResetPassword'
 
 const Transition = React.forwardRef(function Transition(
   props,
@@ -202,6 +205,33 @@ function App() {
             </div>
           </div>
         </section>
+        </>
+      )
+    },
+    {
+      path: '/forgot-password',
+      exact:true,
+      element: (
+        <>
+        <Forgetpassword/>
+        </>
+      )
+    },
+    {
+      path: '/verify-account',
+      exact:true,
+      element: (
+        <>
+        <VerifyAccount/>
+        </>
+      )
+    },
+    {
+      path: '/reset-password',
+      exact:true,
+      element: (
+        <>
+        <ResetPassword/>
         </>
       )
     },

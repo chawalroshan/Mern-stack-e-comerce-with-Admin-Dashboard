@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import ProgressBar from '../../components/ProgressBar/ProgressBar';
 import Tooltip from '@mui/material/Tooltip';
 import Pagination from '@mui/material/Pagination';
-import { FiEdit, FiMail, FiPhone } from "react-icons/fi";
+import { FiEdit, FiMail, FiPhone, FiCalendar } from "react-icons/fi";
 import { FaRegEye, FaRegTrashCan } from "react-icons/fa6";
 import SearchBox from '../../components/SearchBox/SearchBox';
 import { MyContext } from '../../App';
@@ -26,6 +26,7 @@ const columns = [
   { id: 'UserName', label: 'User Name', minWidth: 150 },
   { id: 'userEmail', label: 'User Email', minWidth: 170 },
   { id: 'userPhone', label: 'User Phone Number', minWidth: 170 },
+  { id: 'createdAt', label: 'Created At', minWidth: 150 }, // New column
 ];
 
 const Users = () => {
@@ -42,7 +43,6 @@ const Users = () => {
           <SearchBox />
         </div>
       </div>
-
 
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table">
@@ -84,6 +84,12 @@ const Users = () => {
                   <div className='flex items-center gap-2'>
                     <FiPhone className='text-gray-500 text-[16px]' />
                     <span>+91-9876543210</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className='flex items-center gap-2'>
+                    <FiCalendar className='text-gray-500 text-[16px]' />
+                    <span>2025-08-03</span>
                   </div>
                 </TableCell>
                 <TableCell align="right">
