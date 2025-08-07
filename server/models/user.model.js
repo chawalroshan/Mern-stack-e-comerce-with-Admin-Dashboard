@@ -18,68 +18,61 @@ const userSchema = mongoose.Schema({
     avtar: {
         type: String,
         default: ''
-
     },
     mobile: {
         type: Number,
-        default: 'null'
+        default: null
     },
     verify_email: {
         type: Boolean,
-        deault: false
+        default: false
     },
     last_login_date: {
         type: Date,
-        default: ''
+        default: null
     },
-
     status: {
         type: String,
         enum: ['Active', 'Inactive', 'suspended'],
         default: 'Active'
     },
-
-    address_detils: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'address'
-        }
-
-    ],
-    shopping_cart: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'cartproduct'
-        }
-    ],
-    orderHistory: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'order'
-        }
-    ],
-
+    address_detils: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'address'
+    }],
+    shopping_cart: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'cartproduct'
+    }],
+    orderHistory: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'order'
+    }],
+    otp: {
+        type: String,
+        default: null
+    },
+    otpExpires: {
+        type: Date,
+        default: null
+    },
     forgot_password_otp: {
         type: String,
-        default:null
+        default: null
     },
-
     forgot_password_expiry: {
         type: Date,
-        default:''
+        default: null
     },
-
     role: {
         type: String,
-        enum:['ADMIN' , 'USER'],
-        default:''
+        enum: ['ADMIN', 'USER'],
+        default: 'USER'
     }
-},
+}, {
+    timestamps: true
+});
 
-    {
-        timestamps: true
-    }
-)
 
 const UserModel = mongoose.model('User',userSchema)
 

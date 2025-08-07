@@ -8,11 +8,12 @@ if (!process.env.MONGODB_URI) {
 
 async function connectDB() {
     try {
+        console.log('🔗 Connecting to MongoDB:', process.env.MONGODB_URI);
         await mongoose.connect(process.env.MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        console.log('✅ MongoDB connected');
+        console.log('✅ MongoDB connected to database:', mongoose.connection.db.databaseName);
     } catch (error) {
         console.error('❌ MongoDB connection error:', error.message);
         process.exit(1);
