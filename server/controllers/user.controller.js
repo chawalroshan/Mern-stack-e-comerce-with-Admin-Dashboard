@@ -3,6 +3,8 @@ import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import sendEmailFun from "../config/sendEmail.js";
 import verificationEmail from "../utils/verifyEmailTemplate.js";
+import generateAccessToken from "../utils/generateAccessToken.js";
+import generateRefreshToken from "../utils/generateRefreshToken.js";
 
 export async function registerUserController(request, response) {
     try {
@@ -166,3 +168,102 @@ export async function verifyEmailController(request, response) {
     }
 }
 
+
+export async function loginUserController(request, response) {
+    try {
+        const { email, password } = request.body;
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return response.status(400).json({
+                message: 'User not registered',
+                error: true,
+                success: false
+            });
+        }
+
+        if (user.status !== 'Active') {
+            return response.status(400).json({
+                message: 'Contact the admin',
+                error: true,
+                success: false
+            });
+        }
+
+        const checkPassword = await bcryptjs.compare(password, user.password);
+        if (!checkPassword) {
+            return response.status(400).json({
+                message: 'Check your password',
+                error: true,
+                success: false
+            });
+        }
+
+        const accessToken = await generateAccessToken(user._id);
+        const refreshToken = await generateRefreshToken(user._id);
+
+        await UserModel.findByIdAndUpdate(user._id, {
+            last_login_date: new Date()
+        });
+
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'None'
+        };
+
+        response.cookie('accessToken', accessToken, cookieOptions);
+        response.cookie('refreshToken', refreshToken, cookieOptions);
+
+        return response.json({
+            message: 'Login successfully',
+            error: false,
+            success: true,
+            data: {
+                accessToken,
+                refreshToken
+            }
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+
+export async function logoutController(request, response) {
+    try {
+        const userid = request.userId;
+
+        const cookiesOption = {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None'
+        };
+
+        response.clearCookie('accessToken', cookiesOption);
+        response.clearCookie('refreshToken', cookiesOption);
+
+        const removerefreshToken = await UserModel.findByIdAndUpdate(userid, {
+            refresh_token: ''
+        });
+
+        return response.json({
+            message: 'Logout successfully',
+            error: false,
+            success: true
+        });
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
