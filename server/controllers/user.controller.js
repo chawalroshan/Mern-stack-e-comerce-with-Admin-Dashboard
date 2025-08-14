@@ -203,6 +203,15 @@ export async function loginUserController(request, response) {
             });
         }
 
+        if (user.verify_email !== true) {
+            return response.status(400).json({
+                message: 'Your Email is not verify yet please verify your email first',
+                error: true,
+                success: false
+            });
+        }
+
+
         const checkPassword = await bcryptjs.compare(password, user.password);
         if (!checkPassword) {
             return response.status(400).json({
@@ -286,29 +295,51 @@ var imagesArr = [];
 
 export async function userAvatarController(request, response) {
     try {
-        imagesArr = [];
-
+        let imagesArr = [];
         const userId = request.userId;
         const images = request.files; // multiple file uploads
 
+        const user = await UserModel.findOne({ _id: userId });
+        if (!user) {
+            return response.status(404).json({
+                message: 'User not found',
+                error: true,
+                success: false
+            });
+        }
+
+        // Delete old avatar from Cloudinary if exists
+        if (user.avatar) {
+            const urlArr = user.avatar.split('/');
+            const image = urlArr[urlArr.length - 1];
+            const imageName = image.split('.')[0];
+            if (imageName) {
+                await cloudinary.uploader.destroy(imageName);
+            }
+        }
+
         const options = {
-            use_filename: true,       // corrected key
+            use_filename: true,
             unique_filename: false,
             overwrite: false
         };
 
-        for (let i = 0; i < images?.length; i++) {
-            const result = await cloudinary.uploader.upload(images[i].path, options);
-            imagesArr.push(result.secure_url);
+        // Upload new images
+        for (let i = 0; i < (images?.length || 0); i++) {
+            const uploadResult = await cloudinary.uploader.upload(images[i].path, options);
+            imagesArr.push(uploadResult.secure_url);
 
-            // delete file from local uploads
+            // Delete file from local uploads folder
             fs.unlinkSync(`uploads/${images[i].filename}`);
-            console.log(images[i].filename);
         }
 
+        // Update user avatar
+        user.avatar = imagesArr[0] || user.avatar;
+        await user.save();
+
         return response.status(200).json({
-            _id : userId,
-            avatar : imagesArr[0]
+            _id: userId,
+            avatar: user.avatar
         });
 
     } catch (error) {
@@ -319,6 +350,7 @@ export async function userAvatarController(request, response) {
         });
     }
 }
+
 
 //Remove image from cloudinary
 
@@ -346,6 +378,235 @@ export async function removeImageFromClodinary(request, response) {
     } catch (error) {
         return response.status(500).json({
             message: error.message || 'Failed to delete image',
+        });
+    }
+}
+
+
+
+//update user details
+export async function updateUserDetails(request, response) {
+    try {
+        const userId = request.userId; // from auth middleware
+        const { name, email, mobile, password } = request.body;
+
+        const userExist = await UserModel.findById(userId);
+        if (!userExist) {
+            return response.status(400).send('The user cannot be updated!');
+        }
+
+        let verifyCode = null;
+
+        if (email && email !== userExist.email) {
+            verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        let hashPassword;
+        if (password) {
+            const salt = await bcryptjs.genSalt(10);
+            hashPassword = await bcryptjs.hash(password, salt);
+        } else {
+            hashPassword = userExist.password;
+        }
+
+        const updateUser = await UserModel.findByIdAndUpdate(
+            userId,
+            {
+                name: name,
+                mobile: mobile,
+                email: email,
+                verify_email: email !== userExist.email ? false : true,
+                password: hashPassword,
+                otp: verifyCode ? verifyCode : null,
+                otpExpires: verifyCode ? Date.now() + 600000 : null
+            },
+            { new: true }
+        );
+
+        if (email && email !== userExist.email) {
+            // send verification email
+            await sendEmailFun({
+                sendTo: email,
+                subject: 'Verify email from EcommerceMERNApp',
+                text: '',
+                html: verificationEmail(name, verifyCode)
+            });
+        }
+
+        return response.json({
+            message: 'User updated successfully',
+            error: false,
+            success: true,
+            user: updateUser
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || error,
+            error: true,
+            success: false
+        });
+    }
+}
+
+//forgot password 
+export async function forgotPasswordController(request, response) {
+    try {
+        const { email } = request.body;
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return response.status(400).json({
+                message: "Email not available",
+                error: true,
+                success: false
+            });
+        }else{
+            const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            user.otp = verifyCode;
+            user.otpExpires = Date.now() + 600000;
+
+            await user.save();
+    
+            await sendEmailFun({
+                sendTo: email,
+                subject: 'Verify email from EcommerceMERNApp',
+                text: '',
+                html: verificationEmail(user.name, verifyCode)
+            });
+    
+            return response.json({
+                message: 'Check your email',
+                error: false,
+                success: true
+            });
+        }
+
+
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || "Something went wrong",
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+// verify forgot password OTP
+export async function verifyForgotPasswordOtp(request, response) {
+    try {
+        const { email, otp } = request.body;
+
+        if (!email || !otp) {
+            return response.status(400).json({
+                message: "Provide required fields: email, otp.",
+                error: true,
+                success: false
+            });
+        }
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return response.status(400).json({
+                message: "Email not available",
+                error: true,
+                success: false
+            });
+        }
+
+        if (user.otpExpires < Date.now()) {
+            return response.status(400).json({
+                message: "OTP is expired",
+                error: true,
+                success: false
+            });
+        }
+
+        if (otp !== user.otp) {
+            return response.status(400).json({
+                message: "Invalid OTP",
+                error: true,
+                success: false
+            });
+        }
+
+        // Clear OTP fields after successful verification
+        user.otp = "";
+        user.otpExpires = "";
+        await user.save();
+
+        return response.json({
+            message: "OTP verified successfully",
+            error: false,
+            success: true
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || "Something went wrong",
+            error: true,
+            success: false
+        });
+    }
+}
+
+
+//reset password 
+export async function resetPassword(request, response) {
+    try {
+        const { email, newPassword, confirmpassword } = request.body;
+
+        if (!email || !newPassword || !confirmpassword) {
+            return response.status(400).json({
+                message: 'Provide required fields: email, newPassword, confirmpassword',
+                error: true,
+                success: false
+            });
+        }
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return response.status(400).json({
+                message: "Email not available",
+                error: true,
+                success: false
+            });
+        }
+
+        if (newPassword !== confirmpassword) {
+            return response.status(400).json({
+                message: "New password and confirm password must be the same",
+                error: true,
+                success: false
+            });
+        }
+
+        const salt = await bcryptjs.genSalt(10);
+        const hashPassword = await bcryptjs.hash(newPassword, salt);
+
+        await UserModel.findOneAndUpdate(
+            { _id: user._id },
+            { password: hashPassword }
+        );
+        await user.save();
+
+        return response.json({
+            message: 'Password updated successfully',
+            error: false,
+            success: true
+        });
+
+    } catch (error) {
+        return response.status(500).json({
+            message: error.message || "Something went wrong",
+            error: true,
+            success: false
         });
     }
 }
