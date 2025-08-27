@@ -42,20 +42,21 @@ function App() {
   const [maxWidth, setMaxWidth] = useState('lg');
   const [fullWidth, setFullWidth] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleCloseProductDetailsModal = () => {
     setOpenProductDetailsModal(false);
   };
 
-const openAlertBox = (staus, msg) => {
-  if(staus==='sucess'){
-    toast.success(msg);
+  const openAlertBox = ({ type, msg }) => {
+    if(type === 'success') {
+      toast.success(msg);
+    }
+    if(type === 'error') {
+      toast.error(msg);
+    }
   }
-  if(staus==='sucess'){
-    toast.error(msg);
-  }
-
-}
+  
 
   // ✅ Now this line is safe
   const values = {

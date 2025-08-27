@@ -12,11 +12,11 @@ import fs from 'fs';
 
 
 // Configuration
-cloudinary.config({ 
-    cloud_name: process.env.cloudinary_Config_Cloud_Name, 
-    api_key: process.env.cloudinary_Config_api_key, 
-    api_secret: process.env.cloudinary_Config_api_secret, 
-    secure : true,
+cloudinary.config({
+    cloud_name: process.env.cloudinary_Config_Cloud_Name,
+    api_key: process.env.cloudinary_Config_api_key,
+    api_secret: process.env.cloudinary_Config_api_secret,
+    secure: true,
 });
 
 export async function registerUserController(request, response) {
@@ -31,7 +31,7 @@ export async function registerUserController(request, response) {
             });
         }
 
-        const existingUser = await UserModel.findOne({ email });
+         const existingUser = await UserModel.findOne({ email });
 
         if (existingUser) {
             return response.status(400).json({
@@ -51,20 +51,20 @@ export async function registerUserController(request, response) {
             password: hashPassword,
             name,
             otp: verifyCode,
-            otpExpires: Date.now() + 300000, 
+            otpExpires: Date.now() + 300000,
         });
-        
+
         console.log("Attempting to save user:", {
             name: newUser.name,
             email: newUser.email,
             otp: newUser.otp,
             otpExpires: newUser.otpExpires
         });
-        
+
         const save = await newUser.save(); // ✅ Save the new user
         console.log("User saved successfully:", save._id);
         console.log("Full saved user object:", JSON.stringify(save, null, 2));
-        
+
 
         // Send verification email (non-blocking)
         try {
@@ -88,12 +88,18 @@ export async function registerUserController(request, response) {
             message: 'User registered successfully! Please verify your email.',
             success: true,
             error: false,
-            token
+            token,
+            user: {
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                verify_email: newUser.verify_email
+            }
         });
 
     } catch (error) {
         console.error("Registration error:", error);
-        
+
         // Handle validation errors
         if (error.name === 'ValidationError') {
             const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -104,7 +110,7 @@ export async function registerUserController(request, response) {
                 success: false
             });
         }
-        
+
         // Handle duplicate key errors
         if (error.code === 11000) {
             return response.status(400).json({
@@ -113,7 +119,7 @@ export async function registerUserController(request, response) {
                 success: false
             });
         }
-        
+
         return response.status(500).json({
             message: error.message || 'Something went wrong',
             error: true,
@@ -463,21 +469,21 @@ export async function forgotPasswordController(request, response) {
                 error: true,
                 success: false
             });
-        }else{
+        } else {
             const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             user.otp = verifyCode;
             user.otpExpires = Date.now() + 600000;
 
             await user.save();
-    
+
             await sendEmailFun({
                 sendTo: email,
                 subject: 'Verify email from EcommerceMERNApp',
                 text: '',
                 html: verificationEmail(user.name, verifyCode)
             });
-    
+
             return response.json({
                 message: 'Check your email',
                 error: false,
@@ -614,25 +620,25 @@ export async function resetPassword(request, response) {
 
 
 //refresh token controller
-export async function refreshToken(request, response){
+export async function refreshToken(request, response) {
     try {
         const refreshToken = request.cookies.refreshToken || request?.headers?.authorization?.split(' ')[1] //bearer token
 
-        if(!refreshToken){
+        if (!refreshToken) {
             return response.status(401).json({
-                message : 'Invalid token',
-                error : true,
-                success : false
+                message: 'Invalid token',
+                error: true,
+                success: false
             })
         }
 
-        const verifyToken = await jwt.verify(refreshToken,process.env.SECRET_KEY_REFRESH_TOKEN)
+        const verifyToken = await jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH_TOKEN)
 
-        if(!verifyToken){
+        if (!verifyToken) {
             return response.status(401).json({
-                message : 'token is expired',
-                error : true,
-                success : false
+                message: 'token is expired',
+                error: true,
+                success: false
             })
         }
 
@@ -641,25 +647,25 @@ export async function refreshToken(request, response){
         const newRefreshToken = generateRefreshToken(userId);
 
         const cookiesOption = {
-            httpOnly : true,
-            secure : true,
-            sameSite : 'None'
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None'
         }
 
-        response.cookie('accessToken',newAccessToken,cookiesOption)
+        response.cookie('accessToken', newAccessToken, cookiesOption)
         response.cookie('refreshToken', newRefreshToken, cookiesOption);
 
         return response.json({
-            message : 'New Access token generated',
-            error : false,
-            success : true,
-            data :{
-                accessToken : newAccessToken,
+            message: 'New Access token generated',
+            error: false,
+            success: true,
+            data: {
+                accessToken: newAccessToken,
                 refreshToken: newRefreshToken
             }
         })
 
-        
+
     } catch (error) {
         return response.status(500).json({
             message: error.message || "Something went wrong",
