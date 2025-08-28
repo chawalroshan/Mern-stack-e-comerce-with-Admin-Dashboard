@@ -479,7 +479,7 @@ export async function forgotPasswordController(request, response) {
 
             await sendEmailFun({
                 sendTo: email,
-                subject: 'Verify email from EcommerceMERNApp',
+                subject: 'Verify OTP from EcommerceMERNApp',
                 text: '',
                 html: verificationEmail(user.name, verifyCode)
             });

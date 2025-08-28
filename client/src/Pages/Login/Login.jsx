@@ -24,11 +24,35 @@ const Login = () => {
 
 
     const forgetPassword = () => {
-        // if (formFields.email !=='')
-        context.openAlertBox('success', 'OTP send');
-        navigate('/verify');
+        if (formFields.email === '') {
+            context.openAlertBox({ type: 'error', msg: 'Please enter email' });
+            return;
+        }
+    
+        context.openAlertBox({ type: 'success', msg: `OTP sent to ${formFields.email}` });
+        localStorage.setItem('userEmail', formFields.email);
+        localStorage.setItem('actionType', 'forgot-password');
+    
+        postData("/api/user/forgot-password", { email: formFields.email })
+            .then((response) => {
+                if (response?.error === false) {
+                    context.openAlertBox({ type: 'success', msg: response?.message });
+                    navigate('/verify');
+                    return;
+                } else {
+                    context.openAlertBox({ type: 'error', msg: response?.message });
+                }
+            })
+            .catch((err) => {
+                console.error("Forgot Password Error:", err);
+                context.openAlertBox({ type: 'error', msg: 'Something went wrong' });
+            });
+    };
+    
+    
+    console.log(localStorage.setItem("userEmail", formFields.email));
+        
 
-    }
 
     const onChangeInput = (e) => {
         const { name, value } = e.target;
@@ -72,7 +96,7 @@ const Login = () => {
                     context.openAlertBox({ type: 'success', msg: response.message });
 
                     if (response.data) {
-                        localStorage.setItem("userEmail", response.user?.email);
+                        localStorage.setItem("userEmail", formFields.email);
                         localStorage.setItem("accessToken", response.data.accessToken);  // make sure response.data exists
                         localStorage.setItem("refreshToken", response.data.refreshToken);
                     }

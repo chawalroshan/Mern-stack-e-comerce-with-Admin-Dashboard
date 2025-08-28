@@ -16,25 +16,50 @@ const Verify = () => {
 
   const verifyOTP = (e) => {
     e.preventDefault();
-
-    const userEmail = localStorage.getItem('userEmail');
-
-    postData('/api/user/verifyEmail', {
-      email: userEmail,
-      otp: otp
-    }).then((res) => {
-      if (res?.error === false) {
-        context.openAlertBox(res?.message || "OTP Verified Successfully!");
-        localStorage.removeItem('userEmail')
-        navigate('/login');
-      } else {
-        context.openAlertBox(res?.message || "Invalid OTP, please try again!");
-      }
-    }).catch((err) => {
-      console.error("OTP Verification Error:", err);
-      context.openAlertBox("Something went wrong, please try again.");
-    });
+  
+    const actionType = localStorage.getItem('actionType');
+    const userEmail = localStorage.getItem('userEmail') || '';
+  
+    if (!userEmail) {
+      context.openAlertBox({ type: 'error', msg: 'User email not found' });
+      return;
+    }
+  
+    if (actionType !== 'forgot-password') {
+      postData('/api/user/verifyEmail', { email: userEmail, otp })
+        .then((res) => {
+          context.openAlertBox({
+            type: res?.error ? 'error' : 'success',
+            msg: res?.message || "OTP Verified Successfully!"
+          });
+          if (!res?.error) {
+            localStorage.removeItem('userEmail');
+            navigate('/login');
+          }
+        })
+        .catch((err) => {
+          console.error("OTP Verification Error:", err);
+          context.openAlertBox({ type: 'error', msg: "Something went wrong, please try again." });
+        });
+    } else {
+      postData('/api/user/verify-forgot-password-otp', { email: userEmail, otp })
+        .then((res) => {
+          context.openAlertBox({
+            type: res?.error ? 'error' : 'success',
+            msg: res?.message || "OTP Verified Successfully!"
+          });
+          if (!res?.error) {
+            // localStorage.removeItem('userEmail');
+            navigate('/forgot-password');
+          }
+        })
+        .catch((err) => {
+          console.error("OTP Verification Error:", err);
+          context.openAlertBox({ type: 'error', msg: "Something went wrong, please try again." });
+        });
+    }
   };
+  
 
   return (
     <section className='section py-10'>

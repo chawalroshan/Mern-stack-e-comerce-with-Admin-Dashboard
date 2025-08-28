@@ -103,7 +103,7 @@ function App() {
             <Route path='/register' element={<Register />} />
             <Route path='/cart' element={<Cart />} />
             <Route path='/verify' element={<Verify />} />
-            <Route path='/forget-password' element={<ForgetPassword/>} />
+            <Route path='/forgot-password' element={<ForgetPassword/>} />
             <Route path='/checkout' element={<Checkout/>} />
             <Route path='/my-account' element={<MyAccount/>} />
             <Route path='/my-list' element={<MyList/>} />
