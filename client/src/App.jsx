@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Header from './components/Header/Header'
@@ -24,6 +24,7 @@ import Checkout from './Pages/Checkout/Checkout'
 import MyAccount from './Pages/MyAccount/MyAccount'
 import MyList from './Pages/MyList/MyList'
 import Orders from './Pages/Orders/Orders'
+import { fetchDataFromApi } from './utils/api'
 
 
 const MyContext = createContext();
@@ -41,12 +42,28 @@ function App() {
   const [openProductDetailsModal, setOpenProductDetailsModal] = useState(false);
   const [maxWidth, setMaxWidth] = useState('lg');
   const [fullWidth, setFullWidth] = useState(true);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL;
+  const [userData, setUserData] = useState(null);
 
   const handleCloseProductDetailsModal = () => {
     setOpenProductDetailsModal(false);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+  
+    if (token !== undefined && token !== null && token !== "") {
+      setIsLogin(true);
+      fetchDataFromApi('/api/user/user-details?token=${token').then((response)=>{
+        console.log(response);
+        setUserData(response.data);
+      })
+    } else {
+      setIsLogin(false);
+    }
+  }, []); // run only once on mount
+  
 
   const openAlertBox = ({ type, msg }) => {
     if(type === 'success') {
@@ -68,6 +85,9 @@ function App() {
     openAlertBox,
     isLogin,
     setIsLogin,
+    userData,
+    setUserData,
+
   };
 
   return (

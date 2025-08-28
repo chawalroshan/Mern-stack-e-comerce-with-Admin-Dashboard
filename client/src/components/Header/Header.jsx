@@ -19,6 +19,7 @@ import { MyContext } from '../../App';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
+import { fetchDataFromApi } from '../../utils/api';
 
 
 
@@ -43,6 +44,28 @@ const Header = () => {
   };
 
 const context = useContext(MyContext);
+
+const logout = () => {
+    setAnchorEl(null);
+
+    fetchDataFromApi('/api/user/logout', { withCredentials: true })
+        .then((res) => {
+            console.log(res);
+            if (res?.error === false) {
+                context.setIsLogin(false);
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+            } else {
+                context.openAlertBox({ type: 'error', msg: res.message || 'Logout failed' });
+            }
+        })
+        .catch(err => {
+            console.error('Logout error:', err);
+            context.openAlertBox({ type: 'error', msg: 'Something went wrong during logout' });
+        });
+};
+
+
 
     return (
         <header>
@@ -107,8 +130,8 @@ const context = useContext(MyContext);
                                     <Button className='!w-[40] !h-[40px] !min-w-[40px] !rounded-full !bg-white '><FaRegUser className='text-[16px] text-[rgba(0,0,0,0.7)]'/></Button>
 
                                     <div className='info flex flex-col'>
-                                        <h4 className='leading-3 text-[14px] !mb-0 !font-[500] text-left justify-start capitalize'>Roshan Chawal</h4>
-                                        <span className='text-[13px] !font-[400] capitalize'>chawalroshan@gmail.com</span>
+                                        <h4 className='leading-3 text-[14px] !mb-0 !font-[500] text-left justify-start capitalize'>{context?.userData?.name}</h4>
+                                        <span className='text-[13px] !font-[400] capitalize'>{context?.userData?.email}</span>
 
                                     </div>
 
@@ -167,7 +190,7 @@ const context = useContext(MyContext);
         </MenuItem>
         </Link>
         
-        <MenuItem onClick={handleClose} className='flex gap-2 !py-2'>
+        <MenuItem onClick={logout} className='flex gap-2 !py-2'>
           <IoIosLogOut className='text-[18px]'/> <span className='text-[14px]'>Logout</span>
         </MenuItem>
        
