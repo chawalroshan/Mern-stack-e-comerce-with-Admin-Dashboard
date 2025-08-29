@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 const Register = () => {
 
     const [isPasswordShow, setIsPasswordShow] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);   // ✅ added state
+    const [isLoading, setIsLoading] = useState(false);   
 
     const [formFields, setFormFields] = useState({
         name: "",

@@ -6,7 +6,7 @@ import { IoEyeOff } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { MyContext } from '../../App';
-import CircularProgress from '@mui/material/CircularProgress';
+  
 import { postData } from '../../utils/api';
 
 const Login = () => {

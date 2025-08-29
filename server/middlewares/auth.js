@@ -5,11 +5,7 @@ const auth = async(request, response, next) =>{
         const token =
         request.cookies.accessToken || request.headers?.authorization?.split(' ')[1];
 
-        if (!token){
-            token = request.query.token;
-        }
       
-
         if (!token){
             return response.status(401).json({
                 message : 'Provide token'
