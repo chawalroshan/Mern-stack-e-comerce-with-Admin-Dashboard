@@ -30,7 +30,7 @@ const auth = async(request, response, next) =>{
         return response.status(500).json({
             message : 'You have not login',
             error : true,
-            sucesss : false
+            success : false
         })
         
     }

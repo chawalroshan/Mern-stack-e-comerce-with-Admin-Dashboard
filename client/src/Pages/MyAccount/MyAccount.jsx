@@ -1,23 +1,28 @@
 import { Button } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react'
+import {Collapse} from 'react-collapse';
 import TextField from '@mui/material/TextField';
 import AccountSidebar from '../../components/AccountSidebar/AccountSidebar';
 import { MyContext } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { editData } from '../../utils/api';
+import { editData, postData } from '../../utils/api';
 
 
 const MyAccount = () => {
 
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoading2, setIsLoading2] = useState(false);
+    const [userId, setUserId] = useState('');
+    const [isChangePasswordFromShow, setIsChangePasswordFromShow] = useState(false);
+
     const context = useContext(MyContext);
+   
+
     const navigate = useNavigate();
 
-    const [userId, setUserId] = useState('');
-
     const [formFields, setFormFields] = useState({
-        name:'',
+        name: '',
         email: '',
         mobile: ''
     })
@@ -30,7 +35,107 @@ const MyAccount = () => {
         });
     };
 
+    const onChangePasswordInput = (e) => {
+        const { name, value } = e.target;
+        setChangePassword({
+            ...changePassword,
+            [name]: value
+        });
+    };
+
     const validValue = Object.values(formFields).every(el => el);
+
+    const [changePassword, setChangePassword] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    })
+
+    const validValue2 = Object.values(changePassword).every(el => el);
+
+    const handleSubmitChangePassword = (e) => {
+        e.preventDefault();
+        if (changePassword.oldPassword === '') {
+            context.openAlertBox({
+                type: 'error',
+                msg: 'Please enter old password'
+            });
+            return false;
+        }
+
+        if (changePassword.newPassword === '') {
+            context.openAlertBox({
+                type: 'error',
+                msg: 'Please enter New password'
+            });
+            return false;
+        }
+
+        if (changePassword.confirmPassword === '') {
+            context.openAlertBox({
+                type: 'error',
+                msg: 'Please enter confirm password'
+            });
+            return false;
+        }
+
+        if (changePassword.newPassword !== changePassword.confirmPassword) {
+            context.openAlertBox({
+                type: 'error',
+                msg: 'New password and confirm password do not match'
+            });
+            return false;
+        }
+
+        setIsLoading2(true);
+
+        // Get email from localStorage
+        const userEmail = localStorage.getItem('userEmail');
+        
+        if (!userEmail) {
+            context.openAlertBox({
+                type: 'error',
+                msg: 'User email not found. Please login again.'
+            });
+            return false;
+        }
+        
+        // Prepare data for the API call
+        const passwordData = {
+            email: userEmail,
+            oldPassword: changePassword.oldPassword,
+            newPassword: changePassword.newPassword,
+            confirmPassword: changePassword.confirmPassword
+        };
+
+        console.log("Sending password data:", passwordData);
+        console.log("User email from localStorage:", userEmail);
+
+        postData(`/api/user/reset-password`, passwordData)
+            .then((response) => {
+                console.log("Change Password Response:", response);
+
+                if (response.success) {
+                    context.openAlertBox({ type: 'success', msg: response.message });
+                            setChangePassword({
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+                } else {
+                    context.openAlertBox({ type: 'error', msg: response.message || 'Password change failed!' });
+                }
+            })
+            .catch((err) => {
+                console.error("Change Password Error:", err);
+                context.openAlertBox({ type: 'error', msg: err.response?.data?.message || 'Something went wrong during password change.' });
+            })
+            .finally(() => {
+                setIsLoading2(false);
+            });
+    };
+
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -96,9 +201,9 @@ const MyAccount = () => {
             });
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         const token = localStorage.getItem('accessToken');
-        if (token === null){
+        if (token === null) {
             navigate('/');
         }
     }, [context?.isLogin, navigate])
@@ -111,99 +216,207 @@ const MyAccount = () => {
                 email: context.userData.email || "",
                 mobile: context.userData.mobile || ""
             });
+            setChangePassword({
+                oldPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
+            
+            // Also set the email in localStorage if not already there
+            if (context.userData.email && !localStorage.getItem('userEmail')) {
+                localStorage.setItem('userEmail', context.userData.email);
+            }
+            
+            console.log("User data loaded:", context.userData);
+            console.log("Email in localStorage:", localStorage.getItem('userEmail'));
         }
     }, [context?.userData?._id]);
-    
-  return (
-    <section className='py-10 w-full'>
-        <div className='container flex gap-5'>
-            <div className='col1 w-[20%]'>
-               
-        <AccountSidebar/>
-            </div>
 
-            <div className="col2 w-[50%]">
-                <div className="card bg-white p-5 shadow-md rounded-md">
-                    <h2 className='pb-3'>My Profile</h2>
-                    <hr/>
-                    <form className='mt-5' onSubmit={handleSubmit}>
-                    <div className='flex items-center gap-5'>
-                        <div className='w-[50%]'>
-                            <TextField
-                              label="Full Name"
-                               variant="outlined"
-                                size='small'
-                                name='name'
-                                value={formFields.name}
-                                disabled={isLoading}
-                                 className='w-full'
-                                 onChange={onChangeInput} 
-                                 />
+    return (
+        <section className='py-10 w-full'>
+            <div className='container flex gap-5'>
+                <div className='col1 w-[20%]'>
 
+                    <AccountSidebar />
+                </div>
+
+                <div className="col2 w-[50%]">
+                    <div className="card bg-white p-5 shadow-md rounded-md mb-5">
+                        <div className='flex items-center pb-3'>
+                            <h2 className='pb-3'>My Profile</h2>
+                            <Button className='!ml-auto' onClick={()=>setIsChangePasswordFromShow(!isChangePasswordFromShow)}>Change Password</Button>
                         </div>
+                        <hr />
+                        <form className='mt-8' onSubmit={handleSubmit}>
+                            <div className='flex items-center gap-5'>
+                                <div className='w-[50%]'>
+                                    <TextField
+                                        label="Full Name"
+                                        variant="outlined"
+                                        size='small'
+                                        name='name'
+                                        value={formFields.name}
+                                        disabled={isLoading}
+                                        className='w-full'
+                                        onChange={onChangeInput}
+                                    />
 
-                        <div className='w-[50%]'>
-                            <TextField 
-                             label="Email"
-                              variant="outlined" 
-                              size='small' 
-                              name='email'
-                                value={formFields.email}
-                                disabled={isLoading}
-                              className='w-full'
-                              onChange={onChangeInput}
-                              />
-                            
-                        </div>
+                                </div>
 
-                        
+                                <div className='w-[50%]'>
+                                    <TextField
+                                        label="Email"
+                                        variant="outlined"
+                                        size='small'
+                                        name='email'
+                                        value={formFields.email}
+                                        disabled={isLoading}
+                                        className='w-full'
+                                        onChange={onChangeInput}
+                                    />
 
+                                </div>
+
+
+
+                            </div>
+                            <div className='flex items-center mt-4 gap-5'>
+                                <div className='w-[50%]'>
+                                    <TextField
+                                        label="Phone Number"
+                                        variant="outlined"
+                                        size='small'
+                                        name='mobile'
+                                        value={formFields.mobile}
+                                        disabled={isLoading}
+                                        className='w-full'
+                                        onChange={onChangeInput}
+                                    />
+
+                                </div>
+
+
+
+                            </div>
+                            <br />
+
+                            <div className='flex items-center gap-4'>
+                                <Button
+                                    type='submit'
+                                    disabled={!validValue || isLoading}
+                                    className='btn-org btn-lg w-[100px]'
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <CircularProgress size={20} color="inherit" />
+                                            Save
+                                        </>
+                                    ) : (
+                                        "Save"
+                                    )}
+                                </Button>
+                                <Button className='btn-org btn-border btn-lg w-[100px]'>Cancel</Button>
+                            </div>
+                        </form>
                     </div>
-                    <div className='flex items-center mt-4 gap-5'>
-                        <div className='w-[50%]'>
-                            <TextField  
-                            label="Phone Number" 
-                            variant="outlined" 
-                            size='small' 
-                            name='mobile'
-                                value={formFields.mobile}
-                                disabled={isLoading}
-                            className='w-full'
-                            onChange={onChangeInput}
-                            />
 
+
+                    {/* change password */}
+                    {
+                        isChangePasswordFromShow === true && 
+                    
+                    <Collapse isOpened={isChangePasswordFromShow} className='mb-3'>
+                    <div className="card bg-white p-5 shadow-md rounded-md">
+                        <div className='flex items-center pb-3'>
+                            <h2 className='pb-3'>Change Password</h2>
                         </div>
-
-                        
-
+                        <div className='text-sm text-gray-600 mb-3'>
+                            Changing password for: <strong>{localStorage.getItem('userEmail') || 'Loading...'}</strong>
+                            {!localStorage.getItem('userEmail') && (
+                                <span className='text-red-500 ml-2'>⚠️ Email not found in localStorage</span>
+                            )}
                         </div>
-                        <br/>
+                        <hr />
+                        <form className='mt-8' onSubmit={handleSubmitChangePassword}>
+                            <div className='flex items-center gap-5'>
+                                <div className='w-[50%]'>
+                                    <TextField
+                                        label="Old Password"
+                                        variant="outlined"
+                                        size='small'
+                                        name='oldPassword'
+                                        value={changePassword.oldPassword}
+                                        disabled={isLoading2}
+                                        className='w-full'
+                                        onChange={onChangePasswordInput}
+                                    />
+                                </div>
 
-                        <div className='flex items-center gap-4'>
-                            <Button
-                                type='submit'
-                                disabled={!validValue || isLoading}
-                                className='btn-org btn-lg w-[100px]'
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <CircularProgress size={20} color="inherit" />
-                                        Save
-                                    </>
-                                ) : (
-                                    "Save"
-                                )}
-                            </Button>
-                            <Button className='btn-org btn-border btn-lg w-[100px]'>Cancel</Button>
-                        </div>
-                    </form>
+                                <div className='w-[50%]'>
+                                    <TextField
+                                        label="New Password"
+                                        variant="outlined"
+                                        size='small'
+                                        name='newPassword'
+                                        value={changePassword.newPassword}
+                                        disabled={isLoading2}
+                                        className='w-full'
+                                        onChange={onChangePasswordInput}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className='flex items-center mt-4 gap-5'>
+                                <div className='w-[50%]'>
+                                    <TextField
+                                        label="Confirm Password"
+                                        variant="outlined"
+                                        size='small'
+                                        name='confirmPassword'
+                                        value={changePassword.confirmPassword}
+                                        disabled={isLoading2}
+                                        className='w-full'
+                                        onChange={onChangePasswordInput}
+                                    />
+                                </div>
+                            </div>
+
+                            <br />
+
+                            <div className='flex items-center gap-4'>
+                                <Button
+                                    type='submit'
+                                    disabled={!validValue2 || isLoading2}
+                                    className='btn-org btn-lg w-[100px] cursor-pointer'
+                                >
+                                    {isLoading2 ? (
+                                        <>
+                                            <CircularProgress size={20} color="inherit" />
+                                            &nbsp;Save
+                                        </>
+                                    ) : (
+                                        "Change Password"
+                                    )}
+                                </Button>
+                                <Button
+                                    type='button'
+                                    className='btn-org btn-border btn-lg w-[100px]'
+                                    onClick={() => setChangePassword({ oldPassword: "", newPassword: "", confirmPassword: "" })}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                    </Collapse>
+}
+
+
                 </div>
 
             </div>
-
-        </div>
-    </section>
-  )
+        </section>
+    )
 }
 
 export default MyAccount

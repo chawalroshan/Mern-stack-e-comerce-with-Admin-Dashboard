@@ -563,14 +563,14 @@ export async function verifyForgotPasswordOtp(request, response) {
 }
 
 
-//reset password 
+// reset password 
 export async function resetPassword(request, response) {
     try {
-        const { email, newPassword, confirmpassword } = request.body;
+        const { email, oldPassword, newPassword, confirmPassword } = request.body;
 
-        if (!email || !newPassword || !confirmpassword) {
+        if (!email || !oldPassword || !newPassword || !confirmPassword) {
             return response.status(400).json({
-                message: 'Provide required fields: email, newPassword, confirmpassword',
+                message: 'Provide required fields: email, oldPassword, newPassword, confirmPassword',
                 error: true,
                 success: false
             });
@@ -586,7 +586,17 @@ export async function resetPassword(request, response) {
             });
         }
 
-        if (newPassword !== confirmpassword) {
+        // ✅ check old password
+        const isMatch = await bcryptjs.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return response.status(400).json({
+                message: "Old password is incorrect",
+                error: true,
+                success: false
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
             return response.status(400).json({
                 message: "New password and confirm password must be the same",
                 error: true,
@@ -595,12 +605,10 @@ export async function resetPassword(request, response) {
         }
 
         const salt = await bcryptjs.genSalt(10);
-        const hashPassword = await bcryptjs.hash(confirmpassword, salt);
+        const hashPassword = await bcryptjs.hash(newPassword, salt);
 
-        await UserModel.findOneAndUpdate(
-            { _id: user._id },
-            { password: hashPassword }
-        );
+        // ✅ update password properly
+        user.password = hashPassword;
         await user.save();
 
         return response.json({
@@ -617,6 +625,7 @@ export async function resetPassword(request, response) {
         });
     }
 }
+
 
 
 //refresh token controller
