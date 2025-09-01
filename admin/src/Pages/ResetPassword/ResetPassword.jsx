@@ -1,17 +1,73 @@
 import Button from '@mui/material/Button'
-import React, { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { RiLoginCircleLine } from "react-icons/ri"
 import { FaRegUser } from "react-icons/fa6"
-import { FcGoogle } from "react-icons/fc"
-import { BsFacebook } from "react-icons/bs"
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa"
+import CircularProgress from '@mui/material/CircularProgress';
+import { MyContext } from '../../App'
+import { postData } from '../../utils/api'
+
 
 const ResetPassword = () => {
   const [isPasswordShow, setIsPasswordShow] = useState(false)
   const [isPasswordShow2, setIsPasswordShow2] = useState(false)
+  const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+  const [formFields, setFormFields] = useState({
+    email: '',
+    
+})
+
+  const context = useContext(MyContext);
+
+    const navigate = useNavigate();
+
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormFields({
+            ...formFields,
+            [name]: value
+        });
+    };
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+    
+        if (newPassword !== confirmPassword) {
+            context.openAlertBox({ type: 'error', msg: "Passwords do not match!" });
+            return;
+        }
+    
+        const userEmail = localStorage.getItem('userEmail');
+    
+        if (!userEmail) {
+            context.openAlertBox({ type: 'error', msg: "User email not found!" });
+            return;
+        }
+    setLoading(true);
+
+        postData("/api/user/reset-password", {
+            email: userEmail,
+            newPassword: newPassword,
+            confirmPassword: confirmPassword
+        }).then((res) => {
+            if (res?.error === false) {
+                localStorage.removeItem("userEmail");
+        localStorage.removeItem("actionType");
+                context.openAlertBox({ type: 'success', msg: res.message || "Password reset successfully!" });
+                navigate("/login");
+            } else {
+                context.openAlertBox({ type: 'error', msg: res.message || "Something went wrong!" });
+            }
+        }).catch((err) => {
+            console.error("Reset Password Error:", err);
+            context.openAlertBox({ type: 'error', msg: "Something went wrong!" });
+        });
+    };
 
   return (
     <section className='bg-white w-full h-full fixed top-0 left-0'>
@@ -57,12 +113,14 @@ const ResetPassword = () => {
         </h1>
 
 
-        <form className='w-full mt-6 space-y-4 relative'>
+        <form className='w-full mt-6 space-y-4 relative' onSubmit={handleSubmit}>
 
         <div className='relative'>
             <label className='block text-[14px] font-medium mb-1'>New Password</label>
             <input
               type={isPasswordShow ? 'text' : 'password'}
+              value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
               className='w-full border border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.5)] focus:outline-none px-3 py-2'
             />
             <Button
@@ -81,6 +139,8 @@ const ResetPassword = () => {
             <label className='block text-[14px] font-medium mb-1'> Confirm Password</label>
             <input
               type={isPasswordShow2 ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className='w-full border border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.5)] focus:outline-none px-3 py-2'
             />
             <Button
@@ -95,7 +155,15 @@ const ResetPassword = () => {
             </Button>
           </div>
 
-          <Button className='btn-blue w-full btn-lg !font-bold'>Reset password</Button>
+          {/* <Button className='btn-blue w-full btn-lg !font-bold'>Reset password</Button> */}
+
+          <Button 
+                                type='submit' 
+                                className='btn-blue w-full btn-lg !font-bold'
+                                disabled={loading} 
+                            >
+                                {loading ? <CircularProgress size={24} color="inherit" /> : 'Reset password'} 
+                            </Button>
         </form>
       </div>
     </section>

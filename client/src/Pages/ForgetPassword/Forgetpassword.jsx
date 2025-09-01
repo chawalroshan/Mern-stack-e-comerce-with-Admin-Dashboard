@@ -52,7 +52,7 @@ const ForgetPassword = () => {
         postData("/api/user/reset-password", {
             email: userEmail,
             newPassword: newPassword,
-            confirmpassword: confirmPassword
+            confirmPassword: confirmPassword
         }).then((res) => {
             if (res?.error === false) {
                 localStorage.removeItem("userEmail");

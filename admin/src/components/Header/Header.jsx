@@ -12,19 +12,20 @@ import Divider from '@mui/material/Divider';
 import { FaRegUser } from "react-icons/fa6";
 import { IoIosLogOut } from "react-icons/io";
 import {MyContext} from '../../App'
+import { fetchDataFromApi } from '../../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 
 
 const Header = () => {
 
-
-     const [anchorMyAcc, setAnchorMyAcc] = useState(null);
-  const openMyAcc = Boolean(anchorMyAcc);
-  const handleClickMyAcc = (event) => {
-    setAnchorMyAcc(event.currentTarget);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
   };
-  const handleCloseMyAcc = () => {
-    setAnchorMyAcc(null);
+  const handleClose = () => {
+      setAnchorEl(null);
   };
 
     const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -37,6 +38,34 @@ const Header = () => {
 }));
 
 const context = useContext (MyContext);
+
+const navigate = useNavigate();
+
+const handleSignIn = () =>{
+  navigate('/login');
+}
+
+
+const logout = () => {
+  setAnchorEl(null);
+
+  fetchDataFromApi('/api/user/logout', { withCredentials: true })
+      .then((res) => {
+          console.log(res);
+          if (res?.error === false) {
+              context.setIsLogin(false);
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              navigate('/');
+          } else {
+              context.openAlertBox({ type: 'error', msg: res.message || 'Logout failed' });
+          }
+      })
+      .catch(err => {
+          console.error('Logout error:', err);
+          context.openAlertBox({ type: 'error', msg: 'Something went wrong during logout' });
+      });
+};
 
   return (
     <header className={`w-full h-[auto] py-2 ${context.isSidebarOpen=== true ? 'pl-64' : 'pl-5'} shadow-md pr-7 bg-white flex items-center justify-between transition-all `}>
@@ -59,16 +88,16 @@ const context = useContext (MyContext);
       context.isLogin === true ?
 
       <div className="relative">
-        <div className=' w-[35px] h-[35px] rounded-full' onClick={handleClickMyAcc}>
+        <div className=' w-[35px] h-[35px] rounded-full' onClick={handleClick}>
         <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIJzJUCo-RpJB0V8hJcNhjHSbddEkvk5hZJw&s' alt='user avtar' className='w-full h-full object-cover overflow-hidden cursor-pointer rounded-full'/>
 
     </div>
     <Menu
-        anchorEl={anchorMyAcc}
+        anchorEl={anchorEl}
         id="account-menu"
-        open={openMyAcc}
-        onClose={handleCloseMyAcc}
-        onClick={handleCloseMyAcc}
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
         slotProps={{
           paper: {
             elevation: 0,
@@ -100,7 +129,7 @@ const context = useContext (MyContext);
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleCloseMyAcc} className='bg-white'>
+        <MenuItem onClick={handleClose} className='bg-white'>
           <div className='flex items-center gap-3'>
              <div className='!rounded-full w-[35px] h-[35px] ' >
         <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIJzJUCo-RpJB0V8hJcNhjHSbddEkvk5hZJw&s' alt='user avtar' className='w-full h-full object-cover overflow-hidden cursor-pointer rounded-full'/>
@@ -108,17 +137,17 @@ const context = useContext (MyContext);
     </div>
           </div>
           <div className="info">
-            <h3 className='text-[15px] font-[500] leading-5'>Aiish</h3>
-            <p className='text-[13px] font-[400] opacity-70'>admin@gmail.com</p>
+            <h3 className='text-[15px] font-[500] leading-5'>{context?.userData?.name}</h3>
+            <p className='text-[13px] font-[400] opacity-70'>{context?.userData?.email}</p>
           </div>
         </MenuItem>
         <Divider/>
 
-        <MenuItem onClick={handleCloseMyAcc} className='flex items-center gap-3'>
+        <MenuItem onClick={handleClose} className='flex items-center gap-3'>
           <FaRegUser className='text-[16px]'/><span className='text-[14px] '>Profile</span>
         </MenuItem>
      
-        <MenuItem onClick={handleCloseMyAcc} className='flex items-center gap-3'> 
+        <MenuItem onClick={logout} className='flex items-center gap-3'> 
           <IoIosLogOut className='text-[18px]'/><span className='text-[14px] '>Sign Out</span>
         </MenuItem>
         
@@ -127,7 +156,7 @@ const context = useContext (MyContext);
 
         :
 
-        <Button className='btn btn-blue btn-sm !rounded-full !text-[12px] '>Sign In</Button>
+        <Button className='btn btn-blue btn-sm !rounded-full !text-[12px] ' onClick={handleSignIn}>Sign In</Button>
 
     }
 

@@ -1,17 +1,84 @@
 import Button from '@mui/material/Button'
-import React, { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { RiLoginCircleLine } from "react-icons/ri"
 import { FaRegUser } from "react-icons/fa6"
-import OtpBox from '../../../../client/src/components/OtpBox/OtpBox'
+import OtpBox from '../../components/OtpBox/OtpBox'
+import CircularProgress from '@mui/material/CircularProgress';
+import { MyContext } from '../../App'
+import { postData } from '../../utils/api'
 
 
 const VerifyAccount = () => {
 
   const [otp, setOtp] = useState('');
   const handleChange = (value) => {
-    setOtp(valaue);
-  }
+    setOtp(value);
+  };
+
+  const context = useContext(MyContext);
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const verifyOTP = (e) => {
+    e.preventDefault();
+  
+    const actionType = localStorage.getItem('actionType');
+    const userEmail = localStorage.getItem('userEmail') || '';
+  
+    if (!userEmail) {
+      context.openAlertBox({ type: 'error', msg: 'User email not found' });
+      return;
+    }
+
+    // Add debugging
+    console.log('Sending verification request:', {
+      email: userEmail,
+      otp: otp,
+      actionType: actionType
+    });
+  
+    if (actionType !== 'forgot-password') {
+      setIsLoading(true); // ✅ start loading
+      postData('/api/user/verifyEmail', { email: userEmail, otp: otp.toString() })
+        .then((res) => {
+          console.log('Verification response:', res);
+          context.openAlertBox({
+            type: res?.error ? 'error' : 'success',
+            msg: res?.message || "OTP Verified Successfully!"
+          });
+          if (!res?.error) {
+            localStorage.removeItem('userEmail');
+            navigate('/login');
+          }
+        })
+        .catch((err) => {
+          console.error("OTP Verification Error:", err);
+          context.openAlertBox({ type: 'error', msg: "Something went wrong, please try again." });
+        })
+        .finally(() => {
+          setIsLoading(false);
+      });
+    } else {
+      postData('/api/user/verify-forgot-password-otp', { email: userEmail, otp })
+        .then((res) => {
+          console.log('Forgot password verification response:', res);
+          context.openAlertBox({
+            type: res?.error ? 'error' : 'success',
+            msg: res?.message || "OTP Verified Successfully!" 
+          });
+          if (!res?.error) {
+            // localStorage.removeItem('userEmail');
+            navigate('/reset-password');
+          }
+        })
+        .catch((err) => {
+          console.error("OTP Verification Error:", err);
+          context.openAlertBox({ type: 'error', msg: "Something went wrong, please try again." });
+        });
+    }
+  };
 
   return (
     <section className='bg-white w-full h-full fixed top-0 left-0'>
@@ -58,17 +125,21 @@ const VerifyAccount = () => {
 
         <div className='flex items-center justify-center'>
           <p className='text-[15px]'>OTP send to
-            <span className='text-primary font-bold'> chawalroshan@gmail.com</span>
+            <span className='text-primary font-bold'> {localStorage.getItem('userEmail')}</span>
           </p>
         </div>
+        <form onSubmit={verifyOTP}>
         <div className='flex items-center justify-center mt-4'>
           <OtpBox length={6} onOtpChange={(handleChange)} />
         </div>
-
-
         <br />
+        <Button type='submit' className='btn-blue w-full mt-3'>Verify OTP</Button>
+        </form>
 
-        <Button className='btn-blue w-full mt-3'>Verify OTP</Button>
+
+        
+
+        
 
 
       </div>

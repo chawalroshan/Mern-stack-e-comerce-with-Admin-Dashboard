@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import { IoMdEye } from "react-icons/io";
 import { IoEyeOff } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
@@ -50,7 +51,7 @@ const Login = () => {
     };
     
     
-    console.log(localStorage.setItem("userEmail", formFields.email));
+    // Remove this incorrect console.log line
         
 
 
@@ -67,6 +68,7 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        console.log("Login attempt started");
 
         if (formFields.email === '') {
             context.openAlertBox({
@@ -84,7 +86,7 @@ const Login = () => {
             return false;
         }
 
-
+        console.log("Form validation passed, making API call...");
         setIsLoading(true); // ✅ start loading
 
         postData('/api/user/login', formFields, { withCredentials: true })
@@ -93,19 +95,23 @@ const Login = () => {
 
                 // Check if login was successful
                 if (response.success) {
-                    context.openAlertBox({ type: 'success', msg: response.message });
-
+                    // Set localStorage first
                     if (response.data) {
                         localStorage.setItem("userEmail", formFields.email);
-                        localStorage.setItem("accessToken", response.data.accessToken);  // make sure response.data exists
+                        localStorage.setItem("accessToken", response.data.accessToken);
                         localStorage.setItem("refreshToken", response.data.refreshToken);
                     }
 
-                    // Set global auth state so Header updates immediately
+                    // Set global auth state
                     context.setIsLogin(true);
+                    
+                    // Show success message
+                    context.openAlertBox({ type: 'success', msg: response.message });
 
-                    // Redirect only on successful login
-                    navigate("/");
+                    // Wait a bit for context to update, then navigate
+                    setTimeout(() => {
+                        navigate("/");
+                    }, 100);
                 } else {
                     // Show backend error message
                     context.openAlertBox({ type: 'error', msg: response.message || 'Login failed!' });
@@ -114,7 +120,8 @@ const Login = () => {
             .catch((err) => {
                 console.error("Login Error:", err);
                 // Use backend error message if available
-                context.openAlertBox({ type: 'error', msg: err.response?.data?.message || 'Something went wrong during login.' });
+                const errorMsg = err.response?.data?.message || 'Something went wrong during login.';
+                context.openAlertBox({ type: 'error', msg: errorMsg });
             })
             .finally(() => {
                 setIsLoading(false);

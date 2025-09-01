@@ -1,16 +1,103 @@
 import Button from '@mui/material/Button'
-import React, { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { RiLoginCircleLine } from "react-icons/ri"
 import { FaRegUser } from "react-icons/fa6"
 import { FcGoogle } from "react-icons/fc"
 import { BsFacebook } from "react-icons/bs"
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa"
+import CircularProgress from '@mui/material/CircularProgress';
+import { postData } from '../../utils/api'
+import { MyContext } from '../../App'
+
 
 const Signup = () => {
   const [isPasswordShow, setIsPasswordShow] = useState(false)
   const [loadingGoogle, setLoadingGoogle] = useState(false)
   const [loadingFacebook, setLoadingFacebook] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [formFields, setFormFields] = useState({
+    name:'',
+    email: '',
+    password: ''
+})
+
+const navigate = useNavigate();
+const context = useContext(MyContext);
+
+const onChangeInput = (e) => {
+  const { name, value } = e.target;
+  setFormFields({
+      ...formFields,
+      [name]: value
+  });
+};
+
+const validValue = Object.values(formFields).every(el => el);
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  console.log("register attempt started");
+
+  if (formFields.email === '') {
+      context.openAlertBox({
+          type: 'error',
+          msg: 'Please add email address'
+      });
+      return false;
+  }
+
+  if (formFields.password === '') {
+      context.openAlertBox({
+          type: 'error',
+          msg: 'Please enter password'
+      });
+      return false;
+  }
+
+  console.log("Form validation passed, making API call...");
+  setIsLoading(true); // ✅ start loading
+  postData('/api/user/register', formFields, { withCredentials: true })
+            .then((response) => {
+                console.log("Register Response:", response);
+
+                // Check if register was successful
+                if (response.success) {
+                  localStorage.setItem("userEmail", formFields.email);
+                    // Set localStorage first
+                    if (response.data) {
+                        localStorage.setItem("userEmail", formFields.email);
+                        localStorage.setItem("accessToken", response.data.accessToken);
+                        localStorage.setItem("refreshToken", response.data.refreshToken);
+                    }
+
+                    // Set global auth state
+                    context.setIsLogin(true);
+                    
+                    // Show success message
+                    context.openAlertBox({ type: 'success', msg: response.message });
+
+                    // Wait a bit for context to update, then navigate
+                    setTimeout(() => {
+                        navigate("/verify-account");
+                    });
+                } else {
+                    // Show backend error message
+                    context.openAlertBox({ type: 'error', msg: response.message || 'Register failed!' });
+                }
+            })
+            .catch((err) => {
+                console.error("Login Error:", err);
+                // Use backend error message if available
+                const errorMsg = err.response?.data?.message || 'Something went wrong during register.';
+                context.openAlertBox({ type: 'error', msg: errorMsg });
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    };
 
   return (
     <section className='bg-white w-full h-full fixed top-0 left-0'>
@@ -86,13 +173,17 @@ const Signup = () => {
           <span className='flex-grow h-[1px] bg-[rgba(0,0,0,0.2)]'></span>
         </div>
 
-        <form className='w-full mt-6 space-y-4 relative'>
+        <form className='w-full mt-6 space-y-4 relative' onClick={handleSubmit}>
 
           <div>
             <label className='block text-[14px] font-medium mb-1'>Full Name</label>
             <input
               type='text'
               placeholder=''
+              name='name'
+                                value={formFields.name}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
               className='w-full border border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.5)] focus:outline-none px-3 py-2'
             />
           </div>
@@ -102,6 +193,10 @@ const Signup = () => {
             <input
               type='email'
               placeholder=''
+              name='email'
+                                value={formFields.email}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
               className='w-full border border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.5)] focus:outline-none px-3 py-2'
             />
           </div>
@@ -111,6 +206,10 @@ const Signup = () => {
             <input
               type={isPasswordShow ? 'text' : 'password'}
               placeholder=''
+              name='password'
+                                value={formFields.password}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
               className='w-full border border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.5)] focus:outline-none px-3 py-2'
             />
             <Button
@@ -125,7 +224,21 @@ const Signup = () => {
             </Button>
           </div>
 
-          <Button className='btn-blue w-full btn-lg'>Sign Up</Button>
+                            <Button
+                                type='submit'
+                                disabled={!validValue || isLoading}
+                                className='btn-blue w-full btn-lg'
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <CircularProgress size={20} color="inherit" />
+                                        Sign Up
+                                    </>
+                                ) : (
+                                    "Sign Up"
+                                )}
+                            </Button>
+                        
         </form>
       </div>
     </section>
