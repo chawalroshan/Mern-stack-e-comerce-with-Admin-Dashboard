@@ -13,7 +13,7 @@ import { FaRegUser } from "react-icons/fa6";
 import { IoIosLogOut } from "react-icons/io";
 import {MyContext} from '../../App'
 import { fetchDataFromApi } from '../../utils/api';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 
@@ -143,9 +143,11 @@ const logout = () => {
         </MenuItem>
         <Divider/>
 
+        <Link to='/profile'>
         <MenuItem onClick={handleClose} className='flex items-center gap-3'>
           <FaRegUser className='text-[16px]'/><span className='text-[14px] '>Profile</span>
         </MenuItem>
+        </Link>
      
         <MenuItem onClick={logout} className='flex items-center gap-3'> 
           <IoIosLogOut className='text-[18px]'/><span className='text-[14px] '>Sign Out</span>

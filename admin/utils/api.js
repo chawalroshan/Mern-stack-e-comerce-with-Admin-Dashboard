@@ -51,3 +51,48 @@ export async function fetchDataFromApi(url, params = {}) {
   }
 }
 
+
+export async function uploadImage(url, data = {}, isFormData = false) {
+  try {
+    const response = await axios.put(apiUrl + url, data, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching data:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+
+export async function editData(url, data = {}, isFormData = false) {
+  try {
+    const response = await axios.put(apiUrl + url, data, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching data:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}

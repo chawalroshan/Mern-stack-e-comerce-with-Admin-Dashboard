@@ -38,6 +38,8 @@ import Forgetpassword from './Pages/ForgetPassword/Forgetpassword'
 import VerifyAccount from './Pages/VerifyAccount/VerifyAccount'
 import ResetPassword from './Pages/ResetPassword/ResetPassword'
 import { fetchDataFromApi } from './utils/api'
+import Profile from './Pages/Profile/Profile'
+import AddAddress from './Pages/Address/addAddress'
 
 const Transition = React.forwardRef(function Transition(
   props,
@@ -76,8 +78,11 @@ function App() {
       fetchDataFromApi('/api/user/user-details').then((response)=>{
         console.log(response);
         setUserData(response.data);
+
+        
       })
     } else {
+      window.location.href = '/login';
       setIsLogin(false);
     }
   }, []); // run only once on mount
@@ -261,6 +266,25 @@ function App() {
         </>
       )
     },
+    {
+      path: '/profile',
+      exact:true,
+      element: (
+        <>
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex ">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen===true ? 'w-[18%]' : 'w-[0px] opacity-0 '}  transition-all` } >
+            <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${isSidebarOpen=== false ? 'w-[100%]' : 'w-[82%]'} transition-all `}>
+              <Profile/>
+            </div>
+          </div>
+        </section>
+        </>
+      )
+    },
   ])
 
 
@@ -323,6 +347,9 @@ function App() {
        }
        {
         isOpenFullScreenPanel?.model ==='Add New Sub Category' && <AddSubCategory/>
+       }
+       {
+        isOpenFullScreenPanel?.model ==='Add New Address' && <AddAddress/>
        }
       </Dialog>
       <Toaster/>

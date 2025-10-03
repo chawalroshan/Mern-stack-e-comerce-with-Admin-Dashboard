@@ -44,7 +44,7 @@ const userSchema = mongoose.Schema({
         enum: ['Active', 'Inactive', 'suspended'],
         default: 'Active'
     },
-    address_detils: [{
+    address_details: [{
         type: mongoose.Schema.ObjectId,
         ref: 'address'
     }],

@@ -58,8 +58,11 @@ function App() {
       fetchDataFromApi('/api/user/user-details').then((response)=>{
         console.log(response);
         setUserData(response.data);
+
+        
       })
     } else {
+      window.location.href = '/login';
       setIsLogin(false);
     }
   }, []); // run only once on mount

@@ -46,7 +46,6 @@ const MyAccount = () => {
     const validValue = Object.values(formFields).every(el => el);
 
     const [changePassword, setChangePassword] = useState({
-        oldPassword: '',
         newPassword: '',
         confirmPassword: ''
     })
@@ -55,14 +54,6 @@ const MyAccount = () => {
 
     const handleSubmitChangePassword = (e) => {
         e.preventDefault();
-        if (changePassword.oldPassword === '') {
-            context.openAlertBox({
-                type: 'error',
-                msg: 'Please enter old password'
-            });
-            return false;
-        }
-
         if (changePassword.newPassword === '') {
             context.openAlertBox({
                 type: 'error',
@@ -103,7 +94,6 @@ const MyAccount = () => {
         // Prepare data for the API call
         const passwordData = {
             email: userEmail,
-            oldPassword: changePassword.oldPassword,
             newPassword: changePassword.newPassword,
             confirmPassword: changePassword.confirmPassword
         };
@@ -118,7 +108,6 @@ const MyAccount = () => {
                 if (response.success) {
                     context.openAlertBox({ type: 'success', msg: response.message });
                             setChangePassword({
-            oldPassword: '',
             newPassword: '',
             confirmPassword: ''
         });
@@ -217,7 +206,6 @@ const MyAccount = () => {
                 mobile: context.userData.mobile || ""
             });
             setChangePassword({
-                oldPassword: "",
                 newPassword: "",
                 confirmPassword: ""
             });
@@ -339,18 +327,7 @@ const MyAccount = () => {
                         <hr />
                         <form className='mt-8' onSubmit={handleSubmitChangePassword}>
                             <div className='flex items-center gap-5'>
-                                <div className='w-[50%]'>
-                                    <TextField
-                                        label="Old Password"
-                                        variant="outlined"
-                                        size='small'
-                                        name='oldPassword'
-                                        value={changePassword.oldPassword}
-                                        disabled={isLoading2}
-                                        className='w-full'
-                                        onChange={onChangePasswordInput}
-                                    />
-                                </div>
+                                
 
                                 <div className='w-[50%]'>
                                     <TextField
@@ -401,7 +378,7 @@ const MyAccount = () => {
                                 <Button
                                     type='button'
                                     className='btn-org btn-border btn-lg w-[100px]'
-                                    onClick={() => setChangePassword({ oldPassword: "", newPassword: "", confirmPassword: "" })}
+                                    onClick={() => setChangePassword({ newPassword: "", confirmPassword: "" })}
                                 >
                                     Cancel
                                 </Button>

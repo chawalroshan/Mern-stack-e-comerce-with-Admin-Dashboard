@@ -29,8 +29,9 @@ const addressSchema = mongoose.Schema({
         default:true
     },
     userId:{
-        type:mongoose.Schema.ObjectId,
-        default:''
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
     },
     {
