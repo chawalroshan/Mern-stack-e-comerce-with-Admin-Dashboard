@@ -54,7 +54,7 @@ export async function fetchDataFromApi(url, params = {}) {
 
 export async function uploadImage(url, data = {}, isFormData = false) {
   try {
-    const response = await axios.put(apiUrl + url, data, {
+    const response = await axios.post(apiUrl + url, data, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         ...(isFormData ? {} : { 'Content-Type': 'application/json' })

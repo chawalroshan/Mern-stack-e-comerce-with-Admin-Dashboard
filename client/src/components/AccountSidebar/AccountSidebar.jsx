@@ -134,6 +134,12 @@ const AccountSidebar = () => {
                 </li>
 
                 <li className='w-full'>
+                    <NavLink to='/Address' className={({ isActive }) => isActive ? "active" : ""} >
+                        <Button className='w-full flex items-center gap-2 !rounded-none !text-[rgba(0,0,0,0.8)] !text-left !justify-start !px-5 !capitalize !py-2'>  <FaRegUser className='text-[15px]' /> My Address</Button>
+                    </NavLink>
+                </li>
+
+                <li className='w-full'>
                     <NavLink to='/my-list' className={({ isActive }) => isActive ? "active" : ""} >
                         <Button className='w-full flex items-center gap-2 !rounded-none !text-[rgba(0,0,0,0.8)] !text-left !justify-start !px-5 !capitalize !py-2'>  <FaRegHeart className='text-[16px]' /> My List</Button>
                     </NavLink>

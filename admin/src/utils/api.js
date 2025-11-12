@@ -4,12 +4,6 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 export async function postData(url, formData) {
   try {
-    console.log('API Request:', {
-      url: apiUrl + url,
-      data: formData,
-      apiUrl: apiUrl
-    });
-    
     const response = await axios.post(apiUrl + url, formData, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -17,10 +11,8 @@ export async function postData(url, formData) {
       }
     });
 
-    console.log('API Response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('API Error:', error.response?.data || error.message);
     // If the backend sent a response, return it
     if (error.response && error.response.data) {
       return error.response.data;
@@ -59,37 +51,13 @@ export async function fetchDataFromApi(url, params = {}) {
   }
 }
 
-
-export async function uploadImage(url, data = {}, isFormData = false) {
-  try {
-    const response = await axios.put(apiUrl + url, data, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' })
-      }
-    });
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
-    }
-    console.error('Error fetching data:', error);
-    return {
-      success: false,
-      error: true,
-      message: 'Something went wrong'
-    };
-  }
-}
-
-
 export async function editData(url, data = {}, isFormData = false) {
   try {
     const response = await axios.put(apiUrl + url, data, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' })
-      }
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      },
     });
     return response.data;
   } catch (error) {
@@ -100,7 +68,78 @@ export async function editData(url, data = {}, isFormData = false) {
     return {
       success: false,
       error: true,
+      message: 'Something went wrong',
+    };
+  }
+}
+
+export async function deleteData(url) {
+  try {
+    const response = await axios.delete(apiUrl + url, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error deleting data:', error);
+    return {
+      success: false,
+      error: true,
       message: 'Something went wrong'
     };
   }
 }
+
+
+export async function uploadImages(url, data = {}, isFormData = false) {
+  try {
+    const response = await axios.post(apiUrl + url, data, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error uploading image:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function deleteImages(url, data = {}) {
+  try {
+    const response = await axios.delete(apiUrl + url, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json'
+      },
+      data // axios allows sending data in DELETE using the `data` property
+    });
+
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+
+    console.error('Error deleting image:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+

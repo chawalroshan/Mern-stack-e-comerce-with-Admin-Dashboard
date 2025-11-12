@@ -40,6 +40,7 @@ import ResetPassword from './Pages/ResetPassword/ResetPassword'
 import { fetchDataFromApi } from './utils/api'
 import Profile from './Pages/Profile/Profile'
 import AddAddress from './Pages/Address/addAddress'
+import EditCategory from './Pages/Category/editCategory'
 
 const Transition = React.forwardRef(function Transition(
   props,
@@ -182,6 +183,23 @@ function App() {
         </>
       )
     },
+    {
+  path: '/category/edit/:id',
+  element: (
+    <section className='main'>
+      <Header/>
+      <div className="containerMain flex">
+        <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen ? 'w-[18%]' : 'w-[0px] opacity-0'} transition-all`}>
+          <Sidebar/>
+        </div>
+        <div className={`contentRight py-4 px-5 ${!isSidebarOpen ? 'w-[100%]' : 'w-[82%]'} transition-all`}>
+          <EditCategory />
+        </div>
+      </div>
+    </section>
+  )
+},
+
     {
       path: '/subCategory/list',
       exact:true,
@@ -351,6 +369,9 @@ function App() {
        {
         isOpenFullScreenPanel?.model ==='Add New Address' && <AddAddress/>
        }
+       {/* {
+        isOpenFullScreenPanel?.model ==='Edit Category' && <EditCategory/>
+       } */}
       </Dialog>
       <Toaster/>
 

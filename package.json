@@ -1,0 +1,22 @@
+{
+  "name": "MERN stack Ecommerce Project",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "private": true,
+  "workspaces": [
+    "admin",
+    "client",
+    "server"
+  ],
+  "packages": {},
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  },
+  "scripts": {
+    "admin": "npm run dev --prefix admin",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently -n SERVER,CLIENT,ADMIN -c yellow,cyan,magenta \"npm run dev --prefix server\" \"npm run dev --prefix client\" \"npm run dev --prefix admin\"",
+    "server": "npm run dev --prefix server"
+  }
+}

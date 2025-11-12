@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { useState } from 'react';
 import { FaCloudUploadAlt } from "react-icons/fa";
 import CircularProgress from '@mui/material/CircularProgress';
-import { editData, uploadImage, postData, fetchDataFromApi } from '../../utils/api';
+import { editData, postData, fetchDataFromApi, uploadImages } from '../../utils/api';
 import { MyContext } from '../../App';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -324,7 +324,7 @@ const Profile = () => {
                 }
             }
 
-            uploadImage('/api/user/user-avatar', formData, true).then((response) => {
+            uploadImages('/api/user/user-avatar', formData, true).then((response) => {
                 setUploading(false);
                 let avatar = [];
                 avatar.push(response.data.avatar);

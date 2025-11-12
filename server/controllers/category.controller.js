@@ -13,13 +13,12 @@ cloudinary.config({
     secure : true,
 });
 
-//Image upload
-var imagesArr = [];
+
 
 export async function uploadImages(request, response) {
     try {
-        // let imagesArr = [];
-        const images = request.files; // multiple file uploads
+        const imagesArr = []; // ✅ Move inside function
+        const images = request.files;
 
         const options = {
             use_filename: true,
@@ -27,17 +26,15 @@ export async function uploadImages(request, response) {
             overwrite: false
         };
 
-        // Upload new images
         for (let i = 0; i < (images?.length || 0); i++) {
             const uploadResult = await cloudinary.uploader.upload(images[i].path, options);
             imagesArr.push(uploadResult.secure_url);
-
-            // Delete file from local uploads folder
             fs.unlinkSync(`uploads/${images[i].filename}`);
         }
 
         return response.status(200).json({
-            images : imagesArr
+            images: imagesArr,
+            success: true // ✅ Add success flag
         });
 
     } catch (error) {
@@ -49,21 +46,17 @@ export async function uploadImages(request, response) {
     }
 }
 
-
 // create category
 export async function createCategory(request, response) {
     try {
         let category = new CategoryModel({
             name: request.body.name,
-            images: imagesArr,
+            images: request.body.images || [], // ✅ Get images from request body
             parentId: request.body.parentId,
             parentCatName: request.body.parentCatName,
         });
 
         category = await category.save();
-
-        // reset images array after saving
-        imagesArr = [];
 
         return response.status(201).json({
             message: 'Category created',
@@ -105,7 +98,8 @@ export async function getCategory(request, response){
             message: '',
             error: false,
             success: true,
-            dta : rootCategories
+            data : rootCategories,
+            categories: categories
         });
 
     } catch (error) {
@@ -306,10 +300,10 @@ export async function updatedCategory(request, response){
         const category = await CategoryModel.findByIdAndUpdate(
             request.params.id,
             {
-                name : request.body.name,
-                images : imagesArr.length>0 ? imagesArr[0] : request.body.images,
-                parentId : request.body.parentId,
-                parentCatName : request.body.parentCatName,
+                name: request.body.name,
+                images: request.body.images, // ✅ Get from request body
+                parentId: request.body.parentId,
+                parentCatName: request.body.parentCatName,
             },
             {
                 new: true
