@@ -13,6 +13,8 @@ import productRouter from './routes/product.route.js'
 import cartRouter from './routes/cart.route.js';
 import myListRouter from './routes/myList.route.js';
 import addressRouter from './routes/address.route.js';
+import SubCategoryRouter from './routes/subCategory.routes.js';
+
 
 const PORT = process.env.PORT || 8000; 
 
@@ -39,6 +41,7 @@ app.get('/', (request, response) => {
 
 app.use('/api/user',userRouter)
 app.use('/api/category',categoryRouter)
+app.use('/api/SubCategory',SubCategoryRouter)
 app.use('/api/product',productRouter)
 app.use('/api/cart',cartRouter)
 app.use('/api/myList', myListRouter)

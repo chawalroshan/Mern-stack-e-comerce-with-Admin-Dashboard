@@ -35,19 +35,23 @@ const Category = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  const fetchCategories = () => {
+  
+  const fetchCategories = async () => {
     setLoading(true);
-    fetchDataFromApi('/api/category').then((res) => {
+    try {
+      const res = await fetchDataFromApi('/api/category');
       if (res && res.success) {
-        setCatData(res.categories || []); // ✅ Use 'categories' from response
+        // ✅ Filter top-level categories only
+        const topCategories = (res.categories || []).filter(cat => !cat.parentId);
+        setCatData(topCategories);
       }
-      setLoading(false);
-    }).catch(err => {
+    } catch (err) {
       console.error('Failed to fetch categories:', err);
+    } finally {
       setLoading(false);
-    });
+    }
   };
+  
 
   // ✅ Handle category deletion
   const handleDelete = async (id) => {

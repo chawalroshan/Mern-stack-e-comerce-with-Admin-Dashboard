@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import UploadBox from '../../components/UploadBox/UploadBox';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -7,11 +7,12 @@ import Button from '@mui/material/Button';
 import { MdCloudUpload } from "react-icons/md";
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import { postData, deleteImages } from '../../utils/api';
+import { postData, deleteImages, fetchDataFromApi } from '../../utils/api';
 import { MyContext } from '../../App';
 
 const AddSubCategory = () => {
   const context = useContext(MyContext);
+  const [categories, setCategories] = useState([]);
   const [formFields, setFormFields] = useState({
     categoryId: '',
     subCatName: '',
@@ -19,20 +20,40 @@ const AddSubCategory = () => {
   });
 
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetchDataFromApi('/api/category');
+      if (res && res.success && Array.isArray(res.categories)) {
+        // ✅ Only top-level categories (no parentId)
+        const topCategories = res.categories.filter(cat => !cat.parentId);
+        setCategories(topCategories);
+      } else {
+        context.openAlertBox({ type: 'error', msg: 'Failed to fetch categories' });
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      context.openAlertBox({ type: 'error', msg: 'Error loading categories' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormFields({
-      ...formFields,
-      [name]: value,
-    });
+    setFormFields(prev => ({ ...prev, [name]: value }));
   };
 
   const removeImage = async (index) => {
     const image = formFields.images[index];
     if (!image) return;
     try {
-      await deleteImages('/api/category/deleteImage', { image });
+      await deleteImages('/api/subcategory/deleteImage', { image }); // ✅ SubCategory delete API
     } catch (err) {
       console.error('Error deleting image:', err);
     }
@@ -44,14 +65,17 @@ const AddSubCategory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formFields.subCatName.trim()) return;
+    if (!formFields.subCatName.trim() || !formFields.categoryId) return;
+
     try {
       setSubmitting(true);
+
       const res = await postData('/api/subcategory/create', {
-        categoryId: formFields.categoryId,
-        name: formFields.subCatName,
+        categoryId: formFields.categoryId, // ObjectId
+        name: formFields.subCatName.trim(),
         images: formFields.images,
       });
+
       if (res && res.success) {
         context.openAlertBox({ type: 'success', msg: 'Subcategory created successfully!' });
         context.setIsOpenFullScreenPanel({ open: false });
@@ -66,6 +90,17 @@ const AddSubCategory = () => {
       setSubmitting(false);
     }
   };
+
+
+  if (loading) {
+    return (
+      <section className='p-5 bg-gray-50'>
+        <div className='flex items-center justify-center h-[70vh]'>
+          <p className='text-lg'>Loading categories...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className='p-5 bg-gray-50'>
@@ -84,10 +119,14 @@ const AddSubCategory = () => {
                   value={formFields.categoryId}
                   onChange={handleChange}
                 >
-                  <MenuItem value="men">Men’s Shoes</MenuItem>
-                  <MenuItem value="women">Women’s Shoes</MenuItem>
-                  <MenuItem value="kids">Kids Shoes</MenuItem>
+                  {categories.map(cat => (
+                    <MenuItem key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </MenuItem>
+                  
+                  ))}
                 </Select>
+
               </div>
 
               <div className="col">
@@ -124,10 +163,9 @@ const AddSubCategory = () => {
                 </div>
               ))}
 
-              {/* Always visible upload box */}
               <UploadBox
                 multiple={true}
-                url='/api/category/uploadImage'
+                url='/api/subcategory/uploadSubCatImages' // ✅ Correct URL
                 onChange={(images) =>
                   setFormFields(prev => ({
                     ...prev,
@@ -135,6 +173,7 @@ const AddSubCategory = () => {
                   }))
                 }
               />
+
             </div>
           </div>
         </div>
@@ -142,11 +181,11 @@ const AddSubCategory = () => {
         <hr className='my-5' />
 
         <Button
-          disabled={submitting || !formFields.subCatName.trim()}
+          disabled={submitting || !formFields.subCatName.trim() || !formFields.categoryId}
           type='submit'
           className='btn-blue btn-lg w-full gap-2'
         >
-          Publish and View <MdCloudUpload className='text-[18px]' />
+          {submitting ? 'Publishing...' : 'Publish and View'} <MdCloudUpload className='text-[18px]' />
         </Button>
       </form>
     </section>

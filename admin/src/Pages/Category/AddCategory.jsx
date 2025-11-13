@@ -28,31 +28,31 @@ const AddCategory = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!formFields.name.trim()) return;
-  try {
-    setSubmitting(true);
-    const res = await postData('/api/category/create', {
-      name: formFields.name.trim(),
-      images: formFields.images,
-      parentId: formFields.parentId || null,
-      parentCatName: formFields.parentCatName || ''
-    });
-    if (res && res.success) {
-      setFormFields({ name: '', images: [], parentCatName: '', parentId: '' });
-      context.openAlertBox({ type: 'success', msg: 'Category created successfully!' });
-      context.setIsOpenFullScreenPanel({ open: false }); // ✅ Close dialog
-      window.location.reload(); // ✅ Refresh to show new category
-    } else {
-      context.openAlertBox({ type: 'error', msg: res.message || 'Failed to create category' });
+    e.preventDefault();
+    if (!formFields.name.trim()) return;
+    try {
+      setSubmitting(true);
+      const res = await postData('/api/category/create', {
+        name: formFields.name.trim(),
+        images: formFields.images,
+        parentId: formFields.parentId || null,
+        parentCatName: formFields.parentCatName || ''
+      });
+      if (res && res.success) {
+        setFormFields({ name: '', images: [], parentCatName: '', parentId: '' });
+        context.openAlertBox({ type: 'success', msg: 'Category created successfully!' });
+        context.setIsOpenFullScreenPanel({ open: false }); // ✅ Close dialog
+        window.location.reload(); // ✅ Refresh to show new category
+      } else {
+        context.openAlertBox({ type: 'error', msg: res.message || 'Failed to create category' });
+      }
+    } catch (err) {
+      console.error('Error creating category:', err);
+      context.openAlertBox({ type: 'error', msg: 'Error creating category' });
+    } finally {
+      setSubmitting(false);
     }
-  } catch (err) {
-    console.error('Error creating category:', err);
-    context.openAlertBox({ type: 'error', msg: 'Error creating category' });
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
   const removeImage = async (index) => {
     const image = formFields.images?.[index];
@@ -122,7 +122,7 @@ const AddCategory = () => {
               {/* Always-visible Upload Box */}
               <UploadBox
                 multiple={true}
-                url='/api/category/uploadImage'
+                url='/api/category/uploadImage' // ✅ Correct URL
                 onChange={(images) =>
                   setFormFields(prev => ({
                     ...prev,
@@ -130,6 +130,7 @@ const AddCategory = () => {
                   }))
                 }
               />
+
             </div>
           </div>
         </div>

@@ -41,6 +41,7 @@ import { fetchDataFromApi } from './utils/api'
 import Profile from './Pages/Profile/Profile'
 import AddAddress from './Pages/Address/addAddress'
 import EditCategory from './Pages/Category/editCategory'
+import EditSubCategory from './Pages/SubCategory/EditSubCategory'
 
 const Transition = React.forwardRef(function Transition(
   props,
@@ -217,6 +218,22 @@ function App() {
           </div>
         </section>
         </>
+      )
+    },
+    {
+      path: '/sub-category/edit/:id',
+      element: (
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen ? 'w-[18%]' : 'w-[0px] opacity-0'} transition-all`}>
+              <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${!isSidebarOpen ? 'w-[100%]' : 'w-[82%]'} transition-all`}>
+              <EditSubCategory />
+            </div>
+          </div>
+        </section>
       )
     },
     {

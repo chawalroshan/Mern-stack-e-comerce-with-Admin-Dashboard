@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaRegImages } from "react-icons/fa6";
-import {  uploadImages } from '../../utils/api.js';
+import { uploadImages } from '../../utils/api.js';
 
 const UploadBox = ({ url, multiple = false, onChange }) => {
   const [previews, setPreviews] = useState([]);
@@ -28,8 +28,12 @@ const UploadBox = ({ url, multiple = false, onChange }) => {
         }
       }
 
-      // Upload images
-      const response = await uploadImages('/api/category/uploadImage', formData, true);
+      if (!url) {
+        throw new Error("Upload URL is required!");
+      }
+
+      // ✅ Use the URL passed as prop
+      const response = await uploadImages(url, formData, true);
 
       const uploadedImages = response?.images || [];
 
