@@ -54,7 +54,7 @@ const productSchema = mongoose.Schema({
     },
     category:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'category',
+        ref: 'Category', // must match model name in category.model.js
         required: true
     },
     countInStock:{
@@ -97,7 +97,7 @@ const productSchema = mongoose.Schema({
         timestamps: true
     });
 
-    const ProductModel = mongoose.model('Product',productSchema)
+    const ProductModel = mongoose.model('product',productSchema)
 
 export default ProductModel
     

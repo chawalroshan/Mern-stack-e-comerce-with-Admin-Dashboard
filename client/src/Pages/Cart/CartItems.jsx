@@ -6,117 +6,225 @@ import { GoTriangleDown } from "react-icons/go";
 import Rating from '@mui/material/Rating';
 import { IoCloseSharp } from "react-icons/io5";
 
-const CartItems = (props) => {
-  const [sizeAnchorEl, setSizeAnchorEl] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(props.size || 'S');
+const CartItems = ({ item, context }) => {
+    const [sizeAnchorEl, setSizeAnchorEl] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(item.selectedSize || 'S');
+    const openSize = Boolean(sizeAnchorEl);
 
-  const openSize = Boolean(sizeAnchorEl);
+    const [qtyAnchorEl, setQtyAnchorEl] = useState(null);
+    const [selectedQty, setSelectedQty] = useState(item.quantity || 1);
+    const openQty = Boolean(qtyAnchorEl);
 
-  const [qtyAnchorEl, setQtyAnchorEl] = useState(null);
-  const [selectedQty, setSelectedQty] = useState(props.Qty || '1');
-  const openQty = Boolean(qtyAnchorEl);
+    const handleClickSize = (event) => {
+        setSizeAnchorEl(event.currentTarget);
+    };
 
+    const handleCloseSize = (value) => {
+        setSizeAnchorEl(null);
+        if (value) {
+            setSelectedSize(value);
+            // Update cart item size
+            const updatedItem = { ...item, selectedSize: value };
+            context.updateCartItemQuantity(item._id, item.quantity, updatedItem);
+        }
+    };
 
-  const handleClickSize = (event) => {
-    setSizeAnchorEl(event.currentTarget);
-  };
+    const handleClickQty = (event) => {
+        setQtyAnchorEl(event.currentTarget);
+    };
 
-  const handleCloseSize = (value) => {
-    setSizeAnchorEl(null);
-    if (value) {
-      setSelectedSize(value);
-    }
-  };
+    const handleCloseQty = (value) => {
+        setQtyAnchorEl(null);
+        if (value) {
+            const newQty = parseInt(value);
+            if (newQty >= 1 && newQty <= (item.countInStock || 10)) {
+                setSelectedQty(newQty);
+                context.updateCartItemQuantity(item._id, newQty);
+            }
+        }
+    };
 
-  const handleClickQty = (event) => {
-    setQtyAnchorEl(event.currentTarget);
-  };
+    const handleRemoveItem = () => {
+        if (window.confirm('Are you sure you want to remove this item from your cart?')) {
+            context.removeFromCart(item._id);
+        }
+    };
 
-  const handleCloseQty = (value) => {
-    setQtyAnchorEl(null);
-    if (value) {
-      setSelectedQty(value);
-    }
-  };
-  return (
-    <div className="cartItem w-full p-3 flex items-center gap-4 pb-5 border-b border-[rgba(0,0,0,0.1)]">
-      <div className="img w-[15%] rounded-md overflow-hidden">
-        <Link to='/product/78675' className='group'>
-          <img src='https://demos.codezeel.com/prestashop/PRS21/PRS210502/133-large_default/customizable-mug.jpg' className='w-full group-hover:scale-105 transition-all' />
-        </Link>
-      </div>
-      <div className="info w-[85%] relative">
-        <IoCloseSharp className='cursor-pointer absolute top-[0px] right-[0px] text-[20px] link transition-all' />
-        <span className='text-[13px] '>Soylent Green</span>
-        <h3 className='text-[16px] '><Link className='link'>Plastic Bamboo Dustpan & Brush Black</Link></h3>
-        <Rating name="size-small" defaultValue={4} size="small" readOnly />
+    const calculateDiscount = () => {
+        if (item.oldePrice && item.price && item.oldePrice > item.price) {
+            const discount = ((item.oldePrice - item.price) / item.oldePrice) * 100;
+            return Math.round(discount);
+        }
+        return 0;
+    };
 
-        <div className='flex items-center gap-4 mt-2'>
-          <div className='relative'>
-            <span
-              className='flex items-center justify-center bg-[#f1f1f1] text-[11px] font-[600] py-1 px-2 rounded-md cursor-pointer gap-1'
-              onClick={handleClickSize}
-            >
-              size {selectedSize} <GoTriangleDown />
-            </span>
-            <Menu
-              id="size-menu"
-              anchorEl={sizeAnchorEl}
-              open={openSize}
-              onClose={() => handleCloseSize(null)}
-              slotProps={{
-                list: {
-                  'aria-labelledby': 'basic-button',
-                },
-              }}
-            >
-              <MenuItem onClick={() => handleCloseSize('S')}>S</MenuItem>
-              <MenuItem onClick={() => handleCloseSize('M')}>M</MenuItem>
-              <MenuItem onClick={() => handleCloseSize('L')}>L</MenuItem>
-              <MenuItem onClick={() => handleCloseSize('XL')}>XL</MenuItem>
-              <MenuItem onClick={() => handleCloseSize('XXL')}>XXL</MenuItem>
-            </Menu>
-          </div>
-          <div className='relative'>
-            <span
-              className='flex items-center justify-center bg-[#f1f1f1] text-[11px] font-[600] py-1 px-2 rounded-md cursor-pointer gap-1'
-              onClick={handleClickQty}
-            >
-              Qty:  {selectedQty} <GoTriangleDown />
-            </span>
-            <Menu
-              id="size-menu"
-              anchorEl={qtyAnchorEl}
-              open={openQty}
-              onClose={() => handleCloseQty(null)}
-              slotProps={{
-                list: {
-                  'aria-labelledby': 'basic-button',
-                },
-              }}
-            >
-              <MenuItem onClick={() => handleCloseQty('1')}>1</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('2')}>2</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('3')}>3</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('4')}>4</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('5')}>5</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('6')}>6</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('7')}>7</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('8')}>8</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('9')}>9</MenuItem>
-              <MenuItem onClick={() => handleCloseQty('10')}>10</MenuItem>
-            </Menu>
-          </div>
+    const discount = calculateDiscount();
+    const itemTotal = (item.price || 0) * (item.quantity || 1);
+    const mainImage = item.images && item.images[0] 
+        ? item.images[0] 
+        : 'https://via.placeholder.com/150x150?text=No+Image';
+
+    const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+    const quantities = Array.from({ length: Math.min(item.countInStock || 10, 10) }, (_, i) => i + 1);
+
+    return (
+        <div className="cartItem w-full p-4 md:p-6 flex items-start gap-4 md:gap-6 hover:bg-gray-50 transition-colors">
+            {/* Product Image */}
+            <div className="img w-[25%] md:w-[15%] min-w-[80px] rounded-md overflow-hidden bg-gray-100">
+                <Link 
+                    to={`/product/${item._id}`} 
+                    className='group block h-full'
+                >
+                    <img 
+                        src={mainImage} 
+                        alt={item.name}
+                        className='w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300'
+                    />
+                </Link>
+            </div>
+
+            {/* Product Info */}
+            <div className="info flex-1 relative">
+                {/* Remove Button */}
+                <button 
+                    onClick={handleRemoveItem}
+                    className="absolute top-0 right-0 cursor-pointer text-gray-400 hover:text-red-500 transition-colors p-1"
+                    title="Remove item"
+                >
+                    <IoCloseSharp className='text-[20px] md:text-[22px]' />
+                </button>
+
+                {/* Brand */}
+                {item.brand && (
+                    <span className='text-[12px] text-gray-500 uppercase tracking-wide'>
+                        {item.brand}
+                    </span>
+                )}
+
+                {/* Product Name */}
+                <h3 className='text-[14px] md:text-[16px] font-[600] text-gray-800 mt-1 mb-1'>
+                    <Link 
+                        to={`/product/${item._id}`}
+                        className='hover:text-primary transition-colors line-clamp-2'
+                    >
+                        {item.name}
+                    </Link>
+                </h3>
+
+                {/* Rating */}
+                <div className="flex items-center gap-1 mb-3">
+                    <Rating 
+                        name="product-rating" 
+                        value={item.rating || 0} 
+                        size="small" 
+                        readOnly 
+                        precision={0.5}
+                    />
+                    <span className="text-[11px] text-gray-500">
+                        ({item.rating || 0})
+                    </span>
+                </div>
+
+                {/* Size and Quantity Selectors */}
+                <div className='flex flex-wrap items-center gap-3 md:gap-4 mb-3'>
+                    {/* Size Selector */}
+                    <div className='relative'>
+                        <span
+                            className='flex items-center justify-center bg-gray-100 text-[11px] md:text-[12px] font-[600] py-2 px-3 rounded-md cursor-pointer gap-1 hover:bg-gray-200 transition-colors'
+                            onClick={handleClickSize}
+                        >
+                            Size: {selectedSize} <GoTriangleDown className="ml-1" />
+                        </span>
+                        <Menu
+                            id="size-menu"
+                            anchorEl={sizeAnchorEl}
+                            open={openSize}
+                            onClose={() => handleCloseSize(null)}
+                            slotProps={{
+                                list: {
+                                    'aria-labelledby': 'basic-button',
+                                },
+                            }}
+                        >
+                            {sizes.map((size) => (
+                                <MenuItem 
+                                    key={size}
+                                    onClick={() => handleCloseSize(size)}
+                                    selected={selectedSize === size}
+                                >
+                                    {size}
+                                </MenuItem>
+                            ))}
+                        </Menu>
+                    </div>
+
+                    {/* Quantity Selector */}
+                    <div className='relative'>
+                        <span
+                            className='flex items-center justify-center bg-gray-100 text-[11px] md:text-[12px] font-[600] py-2 px-3 rounded-md cursor-pointer gap-1 hover:bg-gray-200 transition-colors'
+                            onClick={handleClickQty}
+                        >
+                            Qty: {selectedQty} <GoTriangleDown className="ml-1" />
+                        </span>
+                        <Menu
+                            id="qty-menu"
+                            anchorEl={qtyAnchorEl}
+                            open={openQty}
+                            onClose={() => handleCloseQty(null)}
+                            slotProps={{
+                                list: {
+                                    'aria-labelledby': 'basic-button',
+                                },
+                            }}
+                        >
+                            {quantities.map((qty) => (
+                                <MenuItem 
+                                    key={qty}
+                                    onClick={() => handleCloseQty(qty.toString())}
+                                    selected={selectedQty === qty}
+                                >
+                                    {qty}
+                                </MenuItem>
+                            ))}
+                        </Menu>
+                    </div>
+
+                    {/* Stock Status */}
+                    <span className={`text-[11px] px-2 py-1 rounded-full ${item.countInStock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {item.countInStock > 0 ? `Stock: ${item.countInStock}` : 'Out of Stock'}
+                    </span>
+                </div>
+
+                {/* Price */}
+                <div className='flex flex-wrap items-center gap-3 md:gap-4 mt-3'>
+                    <span className='text-[16px] md:text-[18px] font-bold text-gray-800'>
+                        Rs.{(item.price || 0).toFixed(2)}
+                    </span>
+                    
+                    {item.oldePrice && item.oldePrice > item.price && (
+                        <>
+                            <span className='oldPrice line-through text-gray-500 text-[14px] font-[500]'>
+                                Rs.{item.oldePrice.toFixed(2)}
+                            </span>
+                            {discount > 0 && (
+                                <span className='text-[12px] bg-red-100 text-red-800 px-2 py-1 rounded-full font-bold'>
+                                    {discount}% OFF
+                                </span>
+                            )}
+                        </>
+                    )}
+
+                    {/* Item Total */}
+                    <div className="ml-auto">
+                        <span className="text-[14px] text-gray-600">Total:</span>
+                        <span className="ml-2 text-[16px] font-bold text-primary">
+                            Rs.{itemTotal.toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div className='flex items-center gap-4 mt-2'>
-          <span className='Price !text-black font-[600] text-[14px]'>$50.00</span>
-          <span className='oldPrice line-through text-gray-500 text-[14px] font-[500]'>$58.00</span>
-          <span className='Price !text-primary font-[600] text-[14px]'>55% OFF</span>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default CartItems;

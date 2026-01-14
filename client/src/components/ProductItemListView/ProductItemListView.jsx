@@ -5,80 +5,144 @@ import Rating from '@mui/material/Rating';
 import { Button } from '@mui/material';
 import { FaRegHeart } from "react-icons/fa";
 import { IoIosGitCompare } from "react-icons/io";
-import { MdZoomOutMap } from "react-icons/md";
+import { MdZoomOutMap, MdOutlineShoppingCart } from "react-icons/md";
 import Tooltip from '@mui/material/Tooltip';
-import { MdOutlineShoppingCart } from "react-icons/md";
 import { MyContext } from '../../App';
 
+const ProductItemListView = ({ product }) => {
+    const context = useContext(MyContext);
 
-const ProductItemListView = () => {
-const context = useContext(MyContext);
+    if (!product) {
+        console.warn('ProductItemListView: No product data provided');
+        return null;
+    }
+
+    const calculateDiscount = () => {
+        if (product.oldePrice && product.price && product.oldePrice > product.price) {
+            const discount = Math.round(((product.oldePrice - product.price) / product.oldePrice) * 100);
+            return discount;
+        }
+        return 0;
+    };
+
+    const discount = calculateDiscount();
+    const productImages = product.images || [];
+    const mainImage = productImages[0] || 'https://via.placeholder.com/300x300?text=No+Image';
 
     return (
-        <div className='productItem shadow-lg rounded-md overflow-hidden border-1 border-[rgba(0,0,0,0.1)] flex items-center'>
-            <div className='group imageWrapper w-[25%] h-[220px] overflow-hidden rounded-md relative '>
-                <Link to='/'>
-                <div className='img h-[220px] overflow-hidden'>
-                <img src='https://serviceapi.spicezgold.com/download/1742439426968_modestouze-attires-women-s-mukaish-worked-ethnic-jacket-with-top-and-pant-set-product-images-rvziicqwq6-2-202403231855.jpg' alt='Product' className='w-full' />
-
-                <img src='https://serviceapi.spicezgold.com/download/1742439426966_modestouze-attires-women-s-mukaish-worked-ethnic-jacket-with-top-and-pant-set-product-images-rvziicqwq6-0-202403231855.jpg' alt='Product' className='w-full absolute top-0 left-0 opacity-0 transition-all duration-700 group-hover:opacity-100 group-hover:scale-105' />
-                </div>
+        <div className='productItem shadow-lg rounded-md overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 flex flex-col md:flex-row'>
+            <div className='group imageWrapper w-full md:w-[25%] h-[220px] md:h-auto overflow-hidden relative'>
+                <Link to={`/product/${product._id}`}>
+                    <div className='img h-full'>
+                        <img 
+                            src={mainImage} 
+                            alt={product.name || 'Product'} 
+                            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                        />
+                    </div>
                 </Link>
                 
-                {/* ✅ FIXED: left[10px] → left-[10px], text[12px] → text-[12px] */}
-                <span className='discount flex items-center absolute top-[10px] left-[10px] z-50 !bg-primary text-white rounded-md p-2 text-[12px] font-[500]'> 
-                    -5%
-                </span>
-
-                {/* ✅ FIXED: h[35px] → h-[35px] */}
-                <div className='actions absolute top-[-200px] right-[5px] z-50 flex items-center gap-2 flex-col w-[50px] transition-all duration-300 group-hover:top-[10px] opacity-0 group-hover:opacity-100' onClick={() => context.setOpenProductDetailsModal(true)}>
-                     <Tooltip title="View Product Details" placement="left-start">
-                                             <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:!bg-primary hover:!text-white group' onClick={() => context.setOpenProductDetailsModal(true)}>
-                                                 <MdZoomOutMap className='text-[18px]' />
-                                             </Button>
-                                             </Tooltip>
-                     
-                                             <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:!bg-primary hover:!text-white group'>
-                                                 <IoIosGitCompare className='text-[18px]' />
-                                             </Button>
-                     
-                                             <Button className='!w-[35px] !h-[35px] !min-w-[45px] !rounded-full !bg-white !text-black hover:!bg-primary hover:!text-white group'>
-                                                 <FaRegHeart className='text-[18px]' />
-                                             </Button>
-                </div>
+                {discount > 0 && (
+                    <span className='discount flex items-center justify-center absolute top-[10px] left-[10px] z-50 !bg-red-600 text-white rounded-full w-12 h-12 text-[13px] font-bold shadow-lg'>
+                        -{discount}%
+                    </span>
+                )}
             </div>
 
-            <div className='info p-5 py-5 px-8  w-[75%] '>
-                <h6 className='text-[15px] !font-[400]'> 
-                    <Link to='/' className='link transition-all'>Soylent Green</Link>
-                </h6>
-
-                {/* ✅ FIXED: font-500] → font-[500] */}
-                <h3 className='text-[18px] title mt-3 mb-3 font-[500] text-[#000]'> 
-                    <Link to='/' className='link transition-all'>
-                        Cotton Co Ord Set-Tie & Dye Tracksuit with Insert Pockets-Women Tie & Dye 2-Piece Co-Ord Set-1PAIR (Size-XL)
-                    </Link>
-                </h3>
-                <p className='tex-[14px] mb-3'>The sublimation textile printing process provides an exceptional color rendering and a color, guaranteed overtime praesentium voluptatum deleniti atque corrupti quos dolores.</p>
-
-                <Rating name="size-small" defaultValue={4} size="small" readOnly />
-
-                <div className='flex items-center'>
-                    <span className='oldPrice line-through text-gray-500 text-[15px] font-[500]'> 
-                        $58.00
-                    </span>
+            <div className='info p-5 md:w-[75%]'>
+                <div className='flex justify-between items-start mb-2'>
+                    <div>
+                        <h6 className='text-[13px] !font-[400] text-gray-500 mb-1'>
+                            {product.brand || product.catName || 'Generic'}
+                        </h6>
+                        <h3 className='text-[18px] font-[600] mb-2 text-gray-800'>
+                            <Link to={`/product/${product._id}`} className='hover:text-primary transition-colors'>
+                                {product.name || 'Unnamed Product'}
+                            </Link>
+                        </h3>
+                    </div>
                     
-                    <span className='Price !text-primary font-[600] text-[15px]'> 
-                        $50.00
+                    {product.isFeatured && (
+                        <span className='text-[11px] bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold'>
+                            Featured
+                        </span>
+                    )}
+                </div>
+
+                <div className='flex items-center gap-2 mb-3'>
+                    <Rating 
+                        name="product-rating" 
+                        value={product.rating || 0} 
+                        size="small" 
+                        readOnly 
+                        precision={0.5}
+                    />
+                    <span className='text-[13px] text-gray-500'>
+                        ({product.rating || 0} rating)
                     </span>
                 </div>
 
-                <div className='mt-3 '>
-                    <Button className='btn-org flex gap-2 '>Add to cart <MdOutlineShoppingCart className='text-[20px]'/></Button>
+                <p className='text-[14px] text-gray-600 mb-4 line-clamp-3'>
+                    {product.description || 'No description available.'}
+                </p>
+
+                <div className='flex flex-wrap items-center justify-between'>
+                    <div className='flex items-center gap-4 mb-3 md:mb-0'>
+                        {product.oldePrice && product.oldePrice > product.price ? (
+                            <>
+                                <span className='oldPrice line-through text-gray-400 text-[16px] font-[500]'>
+                                    Rs.{product.oldePrice.toFixed(2)}
+                                </span>
+                                <span className='Price !text-primary font-[700] text-[20px]'>
+                                    Rs.{product.price?.toFixed(2) || '0.00'}
+                                </span>
+                            </>
+                        ) : (
+                            <span className='Price !text-primary font-[700] text-[20px]'>
+                                Rs.{product.price?.toFixed(2) || '0.00'}
+                            </span>
+                        )}
+                        
+                        <span className={`text-[12px] px-3 py-1 rounded-full ${product.countInStock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {product.countInStock > 0 ? `In Stock: ${product.countInStock}` : 'Out of Stock'}
+                        </span>
+                    </div>
+
+                    <div className='flex items-center gap-3'>
+                        <Tooltip title="Quick View">
+                            <Button 
+                                className='!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !bg-gray-100 !text-gray-700 hover:!bg-primary hover:!text-white'
+                                onClick={() => context.openProductDetails(product._id)}
+                            >
+                                <MdZoomOutMap className='text-[18px]' />
+                            </Button>
+                        </Tooltip>
+                        
+                        <Tooltip title="Add to Compare">
+                            <Button className='!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !bg-gray-100 !text-gray-700 hover:!bg-primary hover:!text-white'>
+                                <IoIosGitCompare className='text-[18px]' />
+                            </Button>
+                        </Tooltip>
+                        
+                        <Tooltip title="Add to Wishlist">
+                            <Button className='!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !bg-gray-100 !text-gray-700 hover:!bg-primary hover:!text-white'>
+                                <FaRegHeart className='text-[18px]' />
+                            </Button>
+                        </Tooltip>
+                        
+                        <Button 
+                            className='btn-org flex gap-2 !px-4 !py-2'
+                            onClick={() => context.addToCart(product, 1)}
+                            disabled={product.countInStock <= 0}
+                        >
+                            <MdOutlineShoppingCart className='text-[18px]' />
+                            Add to Cart
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default ProductItemListView;

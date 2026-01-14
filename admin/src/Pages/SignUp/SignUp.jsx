@@ -100,8 +100,14 @@ const handleSubmit = (e) => {
     };
 
   return (
-    <section className='bg-white w-full h-full fixed top-0 left-0'>
-      <header className='w-full fixed top-0 left-0 px-6 py-4 flex items-center justify-between z-50 bg-white shadow'>
+    <section className='bg-white min-h-screen w-full relative overflow-y-auto'>
+      <img
+        src='https://static.vecteezy.com/system/resources/previews/001/838/299/non_2x/abstract-silver-metallic-join-lines-on-white-background-geometric-triangle-gradient-shape-pattern-luxury-style-vector.jpg'
+        className='absolute inset-0 w-full h-full opacity-10 object-cover'
+        alt='background'
+      />
+
+      <header className='w-full sticky top-0 left-0 px-6 py-4 flex items-center justify-between z-20 bg-white/90 backdrop-blur shadow'>
         <Link to='/'>
           <img src='/mannerLogo.png' className='w-[180px]' alt='Logo' />
         </Link>
@@ -120,13 +126,7 @@ const handleSubmit = (e) => {
         </div>
       </header>
 
-      <img
-        src='https://static.vecteezy.com/system/resources/previews/001/838/299/non_2x/abstract-silver-metallic-join-lines-on-white-background-geometric-triangle-gradient-shape-pattern-luxury-style-vector.jpg'
-        className='w-full fixed top-0 left-0 opacity-10 object-cover'
-        alt='background'
-      />
-
-      <div className="loginBox card w-[90%] md:w-[45%] mx-auto mt-32 p-8 rounded-lg shadow relative z-50 bg-white">
+      <div className="loginBox card w-[90%] md:w-[45%] mx-auto mt-32 md:mt-36 mb-12 p-8 rounded-lg shadow relative z-10 bg-white">
         <div className='text-center mb-4'>
           <img
             src='https://img.freepik.com/free-photo/shopping-cart-ecommerce-shop-online-store-cartoon-website-icon-sign-symbol-illustration-3d-rendering_56104-1273.jpg'

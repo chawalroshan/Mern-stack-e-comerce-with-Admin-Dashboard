@@ -1,3 +1,4 @@
+// Pages/SubCategory/AddSubCategory.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import UploadBox from '../../components/UploadBox/UploadBox';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -13,10 +14,12 @@ import { MyContext } from '../../App';
 const AddSubCategory = () => {
   const context = useContext(MyContext);
   const [categories, setCategories] = useState([]);
+  const [selectedParent, setSelectedParent] = useState('');
   const [formFields, setFormFields] = useState({
     categoryId: '',
     subCatName: '',
     images: [],
+    level: 2 // Default to subcategory level
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -29,10 +32,8 @@ const AddSubCategory = () => {
   const fetchCategories = async () => {
     try {
       const res = await fetchDataFromApi('/api/category');
-      if (res && res.success && Array.isArray(res.categories)) {
-        // ✅ Only top-level categories (no parentId)
-        const topCategories = res.categories.filter(cat => !cat.parentId);
-        setCategories(topCategories);
+      if (res && res.success) {
+        setCategories(res.categories || []);
       } else {
         context.openAlertBox({ type: 'error', msg: 'Failed to fetch categories' });
       }
@@ -44,6 +45,21 @@ const AddSubCategory = () => {
     }
   };
 
+  const handleParentChange = (e) => {
+    const parentId = e.target.value;
+    setSelectedParent(parentId);
+    
+    // Auto-calculate level based on parent
+    const parentCategory = categories.find(cat => cat._id === parentId);
+    const newLevel = parentCategory ? parentCategory.level + 1 : 2;
+    
+    setFormFields(prev => ({ 
+      ...prev, 
+      categoryId: parentId,
+      level: newLevel
+    }));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormFields(prev => ({ ...prev, [name]: value }));
@@ -53,7 +69,7 @@ const AddSubCategory = () => {
     const image = formFields.images[index];
     if (!image) return;
     try {
-      await deleteImages('/api/subcategory/deleteImage', { image }); // ✅ SubCategory delete API
+      await deleteImages('/api/category/deleteImage', { image });
     } catch (err) {
       console.error('Error deleting image:', err);
     }
@@ -70,27 +86,40 @@ const AddSubCategory = () => {
     try {
       setSubmitting(true);
 
-      const res = await postData('/api/subcategory/create', {
-        categoryId: formFields.categoryId, // ObjectId
+      const res = await postData('/api/category/create', {
+        parentId: formFields.categoryId,
         name: formFields.subCatName.trim(),
         images: formFields.images,
       });
 
       if (res && res.success) {
-        context.openAlertBox({ type: 'success', msg: 'Subcategory created successfully!' });
+        context.openAlertBox({ type: 'success', msg: `${getCategoryLevelName(formFields.level)} created successfully!` });
         context.setIsOpenFullScreenPanel({ open: false });
         window.location.reload();
       } else {
-        context.openAlertBox({ type: 'error', msg: res.message || 'Failed to create subcategory' });
+        context.openAlertBox({ type: 'error', msg: res.message || 'Failed to create category' });
       }
     } catch (err) {
       console.error(err);
-      context.openAlertBox({ type: 'error', msg: 'Error creating subcategory' });
+      context.openAlertBox({ type: 'error', msg: 'Error creating category' });
     } finally {
       setSubmitting(false);
     }
   };
 
+  const getCategoryLevelName = (level) => {
+    const levelNames = {
+      1: 'Category',
+      2: 'Subcategory', 
+      3: 'Sub-subcategory',
+      4: 'Child Category'
+    };
+    return levelNames[level] || `Level ${level} Category`;
+  };
+
+  const getParentOptions = () => {
+    return categories.filter(cat => cat.level < 4); // Limit nesting to 4 levels max
+  };
 
   if (loading) {
     return (
@@ -110,38 +139,43 @@ const AddSubCategory = () => {
 
             <div className="grid grid-cols-2 gap-5 mb-3">
               <div className="col">
-                <h3 className='text-[14px] font-[500] mb-1'>Select Category</h3>
+                <h3 className='text-[14px] font-[500] mb-1'>Select Parent Category</h3>
                 <Select
-                  id="categorySelect"
                   name='categoryId'
                   className='w-full'
                   size='small'
-                  value={formFields.categoryId}
-                  onChange={handleChange}
+                  value={selectedParent}
+                  onChange={handleParentChange}
                 >
-                  {categories.map(cat => (
+                  {getParentOptions().map(cat => (
                     <MenuItem key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </MenuItem>
-                  
+                      {'-'.repeat(cat.level - 1)} {cat.name} {cat.level > 1 && `(Level ${cat.level})`}
+                    </MenuItem>
                   ))}
                 </Select>
-
+                <p className='text-xs text-gray-500 mt-1'>
+                  Selected: {getCategoryLevelName(formFields.level)}
+                </p>
               </div>
 
               <div className="col">
-                <h3 className='text-[14px] font-[500] mb-1'>Sub Category Name</h3>
+                <h3 className='text-[14px] font-[500] mb-1'>
+                  {getCategoryLevelName(formFields.level)} Name
+                </h3>
                 <input
                   type='text'
                   name='subCatName'
                   value={formFields.subCatName}
                   onChange={handleChange}
                   className='w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm'
+                  placeholder={`Enter ${getCategoryLevelName(formFields.level).toLowerCase()} name`}
                 />
               </div>
             </div>
 
-            <h3 className='text-[16px] font-[700] mb-3 mt-4 text-black'>Subcategory Image</h3>
+            <h3 className='text-[16px] font-[700] mb-3 mt-4 text-black'>
+              {getCategoryLevelName(formFields.level)} Image
+            </h3>
 
             <div className="grid grid-cols-7 gap-4">
               {formFields.images.map((img, index) => (
@@ -155,7 +189,7 @@ const AddSubCategory = () => {
                   <div className='uploadbox p-0 rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] bg-gray-100'>
                     <LazyLoadImage
                       className='w-full h-full object-cover'
-                      alt='subcategory'
+                      alt='category'
                       effect='blur'
                       src={img}
                     />
@@ -165,7 +199,7 @@ const AddSubCategory = () => {
 
               <UploadBox
                 multiple={true}
-                url='/api/subcategory/uploadSubCatImages' // ✅ Correct URL
+                url='/api/category/uploadImage'
                 onChange={(images) =>
                   setFormFields(prev => ({
                     ...prev,
@@ -173,7 +207,6 @@ const AddSubCategory = () => {
                   }))
                 }
               />
-
             </div>
           </div>
         </div>
@@ -185,7 +218,8 @@ const AddSubCategory = () => {
           type='submit'
           className='btn-blue btn-lg w-full gap-2'
         >
-          {submitting ? 'Publishing...' : 'Publish and View'} <MdCloudUpload className='text-[18px]' />
+          {submitting ? 'Publishing...' : `Publish ${getCategoryLevelName(formFields.level)}`} 
+          <MdCloudUpload className='text-[18px]' />
         </Button>
       </form>
     </section>

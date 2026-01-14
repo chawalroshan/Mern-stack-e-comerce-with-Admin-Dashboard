@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import DashboardBoxes from '../../components/DashboardBoxes/DashboardBoxes'
 import Button from '@mui/material/Button'
 import { FaPlus } from "react-icons/fa";
@@ -11,83 +11,15 @@ import { FiEdit } from "react-icons/fi";
 import { FaRegEye } from "react-icons/fa6";
 import { FaRegTrashCan } from "react-icons/fa6";
 import Tooltip from '@mui/material/Tooltip';
-import Pagination from '@mui/material/Pagination';
-
-
-
-
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid,Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { MyContext } from '../../App';
+import { fetchDataFromApi } from '../../utils/api';
 
 
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
-
-const columns = [
-  { id: 'id', label: 'ID', minWidth: 80 },
-  { id: 'product', label: 'Product', minWidth: 150 },
-  { id: 'category', label: 'Category', minWidth: 170 },
-
-  {
-    id: 'subcategory',
-    label: 'SUB CATEGORY',
-    minWidth: 170,
-    align: 'right',
-    format: (value) => value.toLocaleString('en-US'),
-  },
-  {
-    id: 'price',
-    label: 'Price',
-    minWidth: 170,
-    align: 'right',
-    format: (value) => value.toLocaleString('en-US'),
-  },
-    {
-      id: 'sales',
-      label: 'Sales',
-      minWidth: 170,
-      align: 'right',
-      format: (value) => value.toFixed(2),
-    },
-    {
-      id: 'action',
-      label: 'Action',
-      minWidth: 170,
-      align: 'right',
-      format: (value) => value.toFixed(2),
-    }
-];
-
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
-}
-
-const rows = [
-  createData('India', 'IN', 1324171354, 3287263),
-  createData('China', 'CN', 1403500365, 9596961),
-  createData('Italy', 'IT', 60483973, 301340),
-  createData('United States', 'US', 327167434, 9833520),
-  createData('Canada', 'CA', 37602103, 9984670),
-  createData('Australia', 'AU', 25475400, 7692024),
-  createData('Germany', 'DE', 83019200, 357578),
-  createData('Ireland', 'IE', 4857000, 70273),
-  createData('Mexico', 'MX', 126577691, 1972550),
-  createData('Japan', 'JP', 126317000, 377973),
-  createData('France', 'FR', 67022000, 640679),
-  createData('United Kingdom', 'GB', 67545757, 242495),
-  createData('Russia', 'RU', 146793744, 17098246),
-  createData('Nigeria', 'NG', 200962417, 923768),
-  createData('Brazil', 'BR', 210147125, 8515767),
-];
 
 const Dashboard = () => {
 
@@ -101,19 +33,10 @@ const Dashboard = () => {
     }
   };
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
   const [categoryFilterVal, setCategoryFilterVal] = useState('');
+  const [productList, setProductList] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   const [chart1Data, setChart1Data] = useState([
     {
@@ -195,6 +118,46 @@ const Dashboard = () => {
     setCategoryFilterVal(event.target.value);
   };
 
+  useEffect(() => {
+    fetchDashboardProducts();
+  }, []);
+
+  const fetchDashboardProducts = async () => {
+    try {
+      setLoadingProducts(true);
+
+      const [productsRes, categoriesRes] = await Promise.all([
+        fetchDataFromApi('/api/product/getAllProducts', { page: 1, perPage: 100 }),
+        fetchDataFromApi('/api/category'),
+      ]);
+
+      if (productsRes?.success) {
+        setProductList(productsRes.products || []);
+      } else {
+        setProductList([]);
+      }
+
+      if (categoriesRes?.success && Array.isArray(categoriesRes.categories)) {
+        setCategories(categoriesRes.categories);
+      } else {
+        setCategories([]);
+      }
+    } catch (error) {
+      console.error('Failed to load dashboard products:', error);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const filteredProductList = useMemo(() => {
+    if (!categoryFilterVal) return productList;
+    return productList.filter(
+      (product) =>
+        product.catId === categoryFilterVal ||
+        product.category?._id === categoryFilterVal
+    );
+  }, [categoryFilterVal, productList]);
+
   const context = useContext(MyContext);
 
   return (
@@ -221,353 +184,146 @@ const Dashboard = () => {
 
       <div className="card my-4 shadow-md bg-white p-5 rounded-md">
         <div className='flex items-center justify-between px-5 py-5'>
-          <h2 className='text-[18px] font-bold  '>Products <span>Tailwind css table</span></h2>
+          <h2 className='text-[18px] font-bold'>Product Overview</h2>
+          <div className='col flex items-center gap-3'>
+            <Button className='btn !bg-green-600 btn-sm'>Export</Button>
+            <Button
+              className='btn-blue btn-sm'
+              onClick={() =>
+                context.setIsOpenFullScreenPanel?.({
+                  open: true,
+                  model: 'Add Product',
+                })
+              }
+            >
+              Add product
+            </Button>
+          </div>
         </div>
 
         <div className='flex items-center w-full pl-5 justify-between pr-5'>
           <div className="col w-[20%]">
-            
-            <h4 className='font-[600] text-[15px] mb-2 '>Category By</h4>
+            <h4 className='font-[600] text-[15px] mb-2'>Category By</h4>
             <Select
-            className='w-full '
-            size='small'
-          labelId="demo-simple-select-standard-label"
-          id="demo-simple-select-standard"
-          value={categoryFilterVal}
-          onChange={handleChangeCatFilter}
-          label="category"
-        >
-          <MenuItem value="">
-            <em>All</em>
-          </MenuItem>
-          <MenuItem value={10}>Men</MenuItem>
-          <MenuItem value={20}>Women</MenuItem>
-          <MenuItem value={30}>Kids</MenuItem>
-        </Select>
+              className='w-full'
+              size='small'
+              labelId="dashboard-product-category"
+              id="dashboard-product-category"
+              value={categoryFilterVal}
+              onChange={handleChangeCatFilter}
+            >
+              <MenuItem value="">
+                <em>All</em>
+              </MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
           </div>
-          <div className='col w-[25%] ml-auto flex items-center gap-3 '>
-         < Button className='btn !bg-green-600 btn-sm '>Export</Button>
-         < Button className='btn-blue btn-sm ' onClick={() => context.setIsOpenFullScreenPanel(
-                                        {
-                                            open: true,
-                                            model: 'Add Product'
-                                        }
-                                    )}>Add product</Button>
-          </div>
-
         </div>
 
         <div className="relative overflow-x-auto mt-5">
-          <table className="w-full text-sm text-left text-gray-700">
-            <thead className="text-xs text-gray-900 uppercase bg-gray-100">
-              <tr>
-                <th className="px-6 py-3 align-middle">
-                  <Checkbox {...label} size='small' className='!p-0 !m-0' />
-                </th>
-                <th className="px-6 py-3 whitespace-nowrap align-middle">Products</th>
-                <th className="px-6 py-3 whitespace-nowrap align-middle">Category</th>
-                <th className="px-6 py-3 whitespace-nowrap align-middle">Sub Category</th>
-                <th className="px-6 py-3 whitespace-nowrap align-middle">Price</th>
-                <th className="px-6 py-3 whitespace-nowrap align-middle">Sales</th>
-                <th className="px-6 py-3 whitespace-nowrap align-middle">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className='odd:bg-white even:bg-gray-50 even:dark:bg-gray-800 border-b border-gray-200'>
-                <td className="px-6 py-2 align-middle">
-                  <Checkbox {...label} size='small' className='!p-0 !m-0' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-4 w-[300px]'>
-                    <div className="img group">
-                      <Link to='/product/8753984'>
-                        <img src='https://media.istockphoto.com/id/814423752/photo/eye-of-model-with-colorful-art-make-up-close-up.jpg?s=612x612&w=0&k=20&c=l15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE=' className='w-[50px] h-[50px] object-cover rounded-md group-hover:scale-105 transition-all' alt='product' />
-                      </Link>
-                    </div>
-                    <div className="info w-[75%]">
-                      <h3 className='text-[12px] font-[600] leading-4 hover:text-primary'>Explore the metrics to understand trends and drive.</h3>
-                      <span className='text-[12px] text-[rgba(0,0,0,0.7)]'>Books</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Electronics</td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Women</td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-[12px] text-[rgba(0,0,0,0.7)] line-through'>Rs.100</span>
-                    <span className='text-[12px] text-primary font-[600]'>Rs.100</span>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <p className='text-[14px] w-[150px]'><span className='text-primary font-[600]'>234</span> sales</p>
-                  <ProgressBar value={40} status='error' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-3'>
-                  <Tooltip title="Edit Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FiEdit className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="View Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegEye className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="Delete Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegTrashCan className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-            <tbody>
-              <tr className='odd:bg-white even:bg-gray-50 even:dark:bg-gray-800 border-b border-gray-200'>
-                <td className="px-6 py-2 align-middle">
-                  <Checkbox {...label} size='small' className='!p-0 !m-0' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-4 w-[300px]'>
-                    <div className="img group">
-                      <Link to='/product/8753984'>
-                        <img src='https://media.istockphoto.com/id/814423752/photo/eye-of-model-with-colorful-art-make-up-close-up.jpg?s=612x612&w=0&k=20&c=l15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE=' className='w-[50px] h-[50px] object-cover rounded-md group-hover:scale-105 transition-all' alt='product' />
-                      </Link>
-                    </div>
-                    <div className="info w-[75%]">
-                      <h3 className='text-[12px] font-[600] leading-4 hover:text-primary'>Explore the metrics to understand trends and drive.</h3>
-                      <span className='text-[12px] text-[rgba(0,0,0,0.7)]'>Books</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Electronics</td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Women</td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-[12px] text-[rgba(0,0,0,0.7)] line-through'>Rs.100</span>
-                    <span className='text-[12px] text-primary font-[600]'>Rs.100</span>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <p className='text-[14px] w-[150px]'><span className='text-primary font-[600]'>234</span> sales</p>
-                  <ProgressBar value={40} status='info' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-3'>
-                  <Tooltip title="Edit Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FiEdit className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="View Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegEye className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="Delete Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegTrashCan className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-            <tbody>
-              <tr className='odd:bg-white even:bg-gray-50 even:dark:bg-gray-800 border-b border-gray-200'>
-                <td className="px-6 py-2 align-middle">
-                  <Checkbox {...label} size='small' className='!p-0 !m-0' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-4 w-[300px]'>
-                    <div className="img group">
-                      <Link to='/product/8753984'>
-                        <img src='https://media.istockphoto.com/id/814423752/photo/eye-of-model-with-colorful-art-make-up-close-up.jpg?s=612x612&w=0&k=20&c=l15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE=' className='w-[50px] h-[50px] object-cover rounded-md group-hover:scale-105 transition-all' alt='product' />
-                      </Link>
-                    </div>
-                    <div className="info w-[75%]">
-                      <h3 className='text-[12px] font-[600] leading-4 hover:text-primary'>Explore the metrics to understand trends and drive.</h3>
-                      <span className='text-[12px] text-[rgba(0,0,0,0.7)]'>Books</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Electronics</td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Women</td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-[12px] text-[rgba(0,0,0,0.7)] line-through'>Rs.100</span>
-                    <span className='text-[12px] text-primary font-[600]'>Rs.100</span>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <p className='text-[14px] w-[150px]'><span className='text-primary font-[600]'>234</span> sales</p>
-                  <ProgressBar value={40} status='sucess' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-3'>
-                  <Tooltip title="Edit Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FiEdit className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="View Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegEye className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="Delete Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegTrashCan className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-            <tbody>
-              <tr className='odd:bg-white even:bg-gray-50 even:dark:bg-gray-800 border-b border-gray-200'>
-                <td className="px-6 py-2 align-middle">
-                  <Checkbox {...label} size='small' className='!p-0 !m-0' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-4 w-[300px]'>
-                    <div className="img group">
-                      <Link to='/product/8753984'>
-                        <img src='https://media.istockphoto.com/id/814423752/photo/eye-of-model-with-colorful-art-make-up-close-up.jpg?s=612x612&w=0&k=20&c=l15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE=' className='w-[50px] h-[50px] object-cover rounded-md group-hover:scale-105 transition-all' alt='product' />
-                      </Link>
-                    </div>
-                    <div className="info w-[75%]">
-                      <h3 className='text-[12px] font-[600] leading-4 hover:text-primary'>Explore the metrics to understand trends and drive.</h3>
-                      <span className='text-[12px] text-[rgba(0,0,0,0.7)]'>Books</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Electronics</td>
-                <td className="px-6 py-2 align-middle whitespace-nowrap">Women</td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-[12px] text-[rgba(0,0,0,0.7)] line-through'>Rs.100</span>
-                    <span className='text-[12px] text-primary font-[600]'>Rs.100</span>
-                  </div>
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <p className='text-[14px] w-[150px]'><span className='text-primary font-[600]'>234</span> sales</p>
-                  <ProgressBar value={40} status='warning' />
-                </td>
-                <td className="px-6 py-2 align-middle">
-                  <div className='flex items-center gap-3'>
-                  <Tooltip title="Edit Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FiEdit className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="View Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegEye className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                    <Tooltip title="Delete Product" placement='top'>
-                    <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'><FaRegTrashCan className='text-[20px] !text-[rgba(0,0,0,0.8)]' /></Button>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className='flex items-center justify-center mt-5'>
-        <Pagination count={10} color="primary" />
-        </div>
-        
-        
-
-      </div>
-
-      <div className="card my-4 shadow-md bg-white p-5 rounded-md">
-        <div className='flex items-center justify-between px-5 py-5'>
-          <h2 className='text-[18px] font-bold  '>Products <span>Material UI Table</span></h2>
-        </div>
-
-        <div className='flex items-center w-full pl-5 justify-between pr-5'>
-          <div className="col w-[20%]">
-            
-            <h4 className='font-[600] text-[15px] mb-2 '>Category By</h4>
-            <Select
-            className='w-full '
-            size='small'
-          labelId="demo-simple-select-standard-label"
-          id="demo-simple-select-standard"
-          value={categoryFilterVal}
-          onChange={handleChangeCatFilter}
-          label="category"
-        >
-          <MenuItem value="">
-            <em>All</em>
-          </MenuItem>
-          <MenuItem value={10}>Men</MenuItem>
-          <MenuItem value={20}>Women</MenuItem>
-          <MenuItem value={30}>Kids</MenuItem>
-        </Select>
-          </div>
-          <div className='col w-[25%] ml-auto flex items-center gap-3 '>
-         < Button className='btn !bg-green-600 btn-sm '>Export</Button>
-         < Button className='btn-blue btn-sm ' onClick={() => context.setIsOpenFullScreenPanel(
-                                        {
-                                            open: true,
-                                            model: 'Add Product'
-                                        }
-                                    )}>Add product</Button>
-          </div>
-
-        </div>
-
-        <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox {...label} size='small' />
-                </TableCell>
-                <TableCell>Product</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Sub Category</TableCell>
-                <TableCell align="right">Price</TableCell>
-                <TableCell align="right">Sales</TableCell>
-                <TableCell align="right">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {[1,2,3,4,5,6,7].map((row, idx) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={idx}>
-                  <TableCell padding="checkbox">
-                    <Checkbox {...label} size='small' />
-                  </TableCell>
-                  <TableCell>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, width: 300 }}>
-                      <div>
-                        <Link to='/product/8753984'>
-                          <img src='https://media.istockphoto.com/id/814423752/photo/eye-of-model-with-colorful-art-make-up-close-up.jpg?s=612x612&w=0&k=20&c=l15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE=' alt='product' style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 8, transition: 'transform 0.2s' }} />
-                        </Link>
+          {loadingProducts ? (
+            <div className='py-10 text-center text-sm text-gray-500'>Loading products...</div>
+          ) : filteredProductList.length === 0 ? (
+            <div className='py-10 text-center text-sm text-gray-500'>No products found.</div>
+          ) : (
+            <table className="w-full text-sm text-left text-gray-700">
+              <thead className="text-xs text-gray-900 uppercase bg-gray-100">
+                <tr>
+                  <th className="px-6 py-3 align-middle">
+                    <Checkbox {...label} size='small' className='!p-0 !m-0' />
+                  </th>
+                  <th className="px-6 py-3 whitespace-nowrap align-middle">Products</th>
+                  <th className="px-6 py-3 whitespace-nowrap align-middle">Category</th>
+                  <th className="px-6 py-3 whitespace-nowrap align-middle">Sub Category</th>
+                  <th className="px-6 py-3 whitespace-nowrap align-middle">Price</th>
+                  <th className="px-6 py-3 whitespace-nowrap align-middle">In Stock</th>
+                  <th className="px-6 py-3 whitespace-nowrap align-middle">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProductList.map((product, idx) => (
+                  <tr
+                    key={product._id || idx}
+                    className='odd:bg-white even:bg-gray-50 border-b border-gray-200'
+                  >
+                    <td className="px-6 py-2 align-middle">
+                      <Checkbox {...label} size='small' className='!p-0 !m-0' />
+                    </td>
+                    <td className="px-6 py-2 align-middle">
+                      <div className='flex items-center gap-4 w-[300px]'>
+                        <div className="img group">
+                          <Link to={`/product/${product._id}`}>
+                            <img
+                              src={product.images?.[0] || 'https://via.placeholder.com/80'}
+                              className='w-[50px] h-[50px] object-cover rounded-md group-hover:scale-105 transition-all'
+                              alt={product.name}
+                            />
+                          </Link>
+                        </div>
+                        <div className="info w-[75%]">
+                          <h3 className='text-[12px] font-[600] leading-4 hover:text-primary'>
+                            {product.name}
+                          </h3>
+                          <span className='text-[12px] text-[rgba(0,0,0,0.7)]'>
+                            {product.brand || 'N/A'}
+                          </span>
+                        </div>
                       </div>
-                      <div style={{ width: '75%' }}>
-                        <h3 style={{ fontSize: 12, fontWeight: 600, lineHeight: '16px', cursor: 'pointer' }}>Explore the metrics to understand trends and drive.</h3>
-                        <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.7)' }}>Books</span>
+                    </td>
+                    <td className="px-6 py-2 align-middle whitespace-nowrap">
+                      {product.category?.name || product.catName || 'N/A'}
+                    </td>
+                    <td className="px-6 py-2 align-middle whitespace-nowrap">
+                      {product.subCat || product.thirdsubCat || 'N/A'}
+                    </td>
+                    <td className="px-6 py-2 align-middle">
+                      <div className='flex flex-col gap-2'>
+                        <span className='text-[12px] text-[rgba(0,0,0,0.7)] line-through'>
+                          {product.oldePrice ? `Rs.${product.oldePrice}` : '-'}
+                        </span>
+                        <span className='text-[12px] text-primary font-[600]'>
+                          Rs.{product.price}
+                        </span>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>Electronics</TableCell>
-                  <TableCell>Women</TableCell>
-                  <TableCell align="right">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.7)', textDecoration: 'line-through' }}>Rs.100</span>
-                      <span style={{ fontSize: 12, color: '#2563eb', fontWeight: 600 }}>Rs.100</span>
-                    </div>
-                  </TableCell>
-                  <TableCell align="right">
-                    <div style={{ width: 150 }}>
-                      <span style={{ fontSize: 14, color: '#2563eb', fontWeight: 600 }}>234</span> sales
-                      <ProgressBar value={40} status={idx === 0 ? 'error' : idx === 1 ? 'info' : idx === 2 ? 'sucess' : 'warning'} />
-                    </div>
-                  </TableCell>
-                  <TableCell align="right">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <Tooltip title="Edit Product" placement='top'>
-                        <Button sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#f1f1f1', p: 0 }}><FiEdit style={{ fontSize: 20, color: 'rgba(0,0,0,0.8)' }} /></Button>
-                      </Tooltip>
-                      <Tooltip title="View Product" placement='top'>
-                        <Button sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#f1f1f1', p: 0 }}><FaRegEye style={{ fontSize: 20, color: 'rgba(0,0,0,0.8)' }} /></Button>
-                      </Tooltip>
-                      <Tooltip title="Delete Product" placement='top'>
-                        <Button sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#f1f1f1', p: 0 }}><FaRegTrashCan style={{ fontSize: 20, color: 'rgba(0,0,0,0.8)' }} /></Button>
-                      </Tooltip>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <div className='flex items-center justify-center mt-5'>
-          <Pagination count={10} color="primary" />
+                    </td>
+                    <td className="px-6 py-2 align-middle">
+                      <p className='text-[14px] w-[150px]'>
+                        <span className='text-primary font-[600]'>{product.countInStock || 0}</span>{' '}
+                        units
+                      </p>
+                      <ProgressBar
+                        value={Math.min(100, product.countInStock || 0)}
+                        status={idx % 4 === 0 ? 'error' : idx % 4 === 1 ? 'info' : idx % 4 === 2 ? 'sucess' : 'warning'}
+                      />
+                    </td>
+                    <td className="px-6 py-2 align-middle">
+                      <div className='flex items-center gap-3'>
+                        <Tooltip title="Edit Product" placement='top'>
+                          <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'>
+                            <FiEdit className='text-[20px] !text-[rgba(0,0,0,0.8)]' />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="View Product" placement='top'>
+                          <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'>
+                            <FaRegEye className='text-[20px] !text-[rgba(0,0,0,0.8)]' />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="Delete Product" placement='top'>
+                          <Button className='!w-[30px] !h-[30px] !min-w-[30px] !rounded-full !bg-[#f1f1f1]'>
+                            <FaRegTrashCan className='text-[20px] !text-[rgba(0,0,0,0.8)]' />
+                          </Button>
+                        </Tooltip>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 

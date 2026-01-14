@@ -4,7 +4,7 @@ import { addToMyListController, deleteToMyListController, getMyListController } 
 
 const myListRouter = Router ()
 myListRouter.post('/add',auth, addToMyListController)
-myListRouter.delete('/:id/delete',auth, deleteToMyListController)
+myListRouter.delete('/:id', auth, deleteToMyListController);
 myListRouter.get('/get',auth, getMyListController)
 
 

@@ -130,9 +130,9 @@ const Login = () => {
 
 
     return (
-        <section className='section py-10'>
+        <section className='section py-10 min-h-screen overflow-y-auto'>
             <div className='container'>
-                <div className='card shadow-md w-[400px] m-auto !rounded-md !bg-white p-5 px-10' style={{ backgroundColor: '#f5f5f5' }}>
+                <div className='card shadow-md w-[400px] m-auto !rounded-md !bg-white p-5 px-10 mb-10' style={{ backgroundColor: '#f5f5f5' }}>
                     <h3 className='text-center text-[18px] font-[600]'> Login to your account</h3>
                     <form className='w-full mt-5' onSubmit={handleSubmit}>
                         <div className='form-group w-full mb-5'>

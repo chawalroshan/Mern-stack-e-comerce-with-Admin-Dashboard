@@ -180,7 +180,7 @@ const EditCategory = () => {
 
               <UploadBox
                 multiple={true}
-                url='/api/category/uploadImages'
+                url='/api/category/uploadImage'
                 onChange={(images) =>
                   setFormFields(prev => ({
                     ...prev,

@@ -35,7 +35,12 @@ const UploadBox = ({ url, multiple = false, onChange }) => {
       // ✅ Use the URL passed as prop
       const response = await uploadImages(url, formData, true);
 
-      const uploadedImages = response?.images || [];
+      const uploadedImages = (response?.images || []).map(img => {
+        if (typeof img === "string") return img;
+        if (img.url) return img.url;
+        return "";
+      });
+      
 
       if (typeof onChange === 'function') {
         onChange(uploadedImages);

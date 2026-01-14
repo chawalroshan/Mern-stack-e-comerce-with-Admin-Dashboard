@@ -42,6 +42,7 @@ import Profile from './Pages/Profile/Profile'
 import AddAddress from './Pages/Address/addAddress'
 import EditCategory from './Pages/Category/editCategory'
 import EditSubCategory from './Pages/SubCategory/EditSubCategory'
+import EditProduct from './Pages/Products/EditProduct'
 
 const Transition = React.forwardRef(function Transition(
   props,
@@ -144,6 +145,22 @@ function App() {
           </div>
         </section>
         </>
+      )
+    },
+    {
+      path: '/product/edit/:id',
+      element: (
+        <section className='main'>
+          <Header/>
+          <div className="containerMain flex">
+            <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen ? 'w-[18%]' : 'w-[0px] opacity-0'} transition-all`}>
+              <Sidebar/>
+            </div>
+            <div className={`contentRight py-4 px-5 ${!isSidebarOpen ? 'w-[100%]' : 'w-[82%]'} transition-all`}>
+              <EditProduct />
+            </div>
+          </div>
+        </section>
       )
     },
     {
@@ -374,9 +391,6 @@ function App() {
        {
         isOpenFullScreenPanel?.model ==='Add Product' && <AddProduct/>
        }
-       {
-        isOpenFullScreenPanel?.model ==='Add Home Slide' && <AddHomeSlide/>
-       }
         {
         isOpenFullScreenPanel?.model ==='Add New Category' && <AddCategory/>
        }
@@ -385,6 +399,12 @@ function App() {
        }
        {
         isOpenFullScreenPanel?.model ==='Add New Address' && <AddAddress/>
+       }
+       {
+       isOpenFullScreenPanel.model === 'Home Slider Banners' && <HomeSliderBanners />
+       }
+       {
+       isOpenFullScreenPanel.model === 'Add Home Slide' && <AddHomeSlide />
        }
        {/* {
         isOpenFullScreenPanel?.model ==='Edit Category' && <EditCategory/>

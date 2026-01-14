@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
+import { useParams } from 'react-router-dom'
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import { Link } from 'react-router-dom'
 import ProductZoom from '../../components/ProductZoom/ProductZoom';
@@ -6,213 +7,446 @@ import { Button } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import ProductSlider from '../../components/ProductSlider/ProductSlider';
 import ProductDetailsComponent from '../../components/ProductDetails/ProductDetails';
+import Rating from '@mui/material/Rating';
+import { MyContext } from '../../App';
 
 const ProductDetails = () => {
-
-  // const [productActionIndex, setProductActionIndex] = useState(null);
+  const { id } = useParams();
+  const context = useContext(MyContext);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
-  return (
-    <>
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      name: 'John Doe',
+      date: '2024-01-15',
+      rating: 4,
+      comment: 'Great product! Very satisfied with the quality.',
+      avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=random'
+    },
+    {
+      id: 2,
+      name: 'Jane Smith',
+      date: '2024-01-10',
+      rating: 5,
+      comment: 'Excellent product, highly recommend!',
+      avatar: 'https://ui-avatars.com/api/?name=Jane+Smith&background=random'
+    },
+    {
+      id: 3,
+      name: 'Robert Johnson',
+      date: '2024-01-05',
+      rating: 3,
+      comment: 'Good product but delivery was slow.',
+      avatar: 'https://ui-avatars.com/api/?name=Robert+Johnson&background=random'
+    }
+  ]);
+  const [newReview, setNewReview] = useState({
+    comment: '',
+    rating: 0
+  });
+
+  useEffect(() => {
+    fetchProductDetails();
+  }, [id]);
+
+  const fetchProductDetails = async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      console.log('Fetching product details for ID:', id);
+      
+      const productData = await context.fetchProductById(id);
+      console.log('Product data fetched:', productData);
+      
+      if (productData) {
+        setProduct(productData);
+        context.setSelectedProduct(productData);
+      } else {
+        console.error('No product data returned');
+      }
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      context.openAlertBox({ type: 'error', msg: 'Failed to load product details' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!newReview.comment.trim() || newReview.rating === 0) {
+      context.openAlertBox({ type: 'error', msg: 'Please provide both rating and comment' });
+      return;
+    }
+
+    const review = {
+      id: reviews.length + 1,
+      name: context.userData?.name || 'Anonymous',
+      date: new Date().toISOString().split('T')[0],
+      rating: newReview.rating,
+      comment: newReview.comment,
+      avatar: context.userData?.avatar || `https://ui-avatars.com/api/?name=${context.userData?.name || 'User'}&background=random`
+    };
+
+    setReviews([review, ...reviews]);
+    setNewReview({ comment: '', rating: 0 });
+    context.openAlertBox({ type: 'success', msg: 'Review submitted successfully!' });
+  };
+
+  const getRelatedProducts = () => {
+    if (!product || !context.products) return [];
+    
+    // Get products from same category
+    const relatedProducts = context.products.filter(p => 
+      p._id !== product._id && 
+      (p.category?._id === product.category?._id || 
+       p.catId === product.catId ||
+       p.subCatId === product.subCatId)
+    ).slice(0, 8);
+    
+    // If not enough category matches, get featured products
+    if (relatedProducts.length < 4 && context.featuredProducts) {
+      const featured = context.featuredProducts
+        .filter(p => p._id !== product._id)
+        .slice(0, 8 - relatedProducts.length);
+      return [...relatedProducts, ...featured];
+    }
+    
+    return relatedProducts;
+  };
+
+  if (loading) {
+    return (
       <div className='py-5'>
         <div className="container">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading product details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className='py-5'>
+        <div className="container">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Product Not Found</h2>
+            <p className="text-gray-600 mb-6">The product you're looking for doesn't exist or has been removed.</p>
+            <Link to="/" className="btn-org px-6 py-3">
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const relatedProducts = getRelatedProducts();
+
+  return (
+    <>
+      <div className='py-5 bg-gray-50'>
+        <div className="container">
           <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/" className='link transition'>
+            <Link to="/" className='text-gray-600 hover:text-primary transition-colors'>
               Home
             </Link>
-            <Link
-              underline="hover"
-              color="inherit"
-              href="/material-ui/getting-started/installation/"
-              className='link transition'
-            >
-              Fashion
-            </Link>
-            <Link
-              underline="hover"
-              color="inherit"
-              href="/material-ui/getting-started/installation/"
-              className='link transition'
-            >
-              Brown jacket
-            </Link>
-
+            {product.category?.name && (
+              <Link 
+                to={`/category/${product.category._id}`}
+                className='text-gray-600 hover:text-primary transition-colors'
+              >
+                {product.category.name}
+              </Link>
+            )}
+            {product.subCat && (
+              <Link 
+                to={`/category/${product.catId}/${product.subCatId}`}
+                className='text-gray-600 hover:text-primary transition-colors'
+              >
+                {product.subCat}
+              </Link>
+            )}
+            <span className="text-gray-900 font-medium">
+              {product.name}
+            </span>
           </Breadcrumbs>
         </div>
 
-        <section className='bg-white py-5 mt-4'>
-          <div className="container flex items-center gap-8">
-            <div className="productZoomContainer w-[40%] ">
-              <ProductZoom />
-            </div>
-
-            <div className="productContent w-[60%] pr-10 pl-10">
-             <ProductDetailsComponent/>
-            </div>
-
-          </div>
-
-          <div className="container pt-10">
-            <div className='flex items-center gap-8'>
-              <span className={`link text-[17px] cursor-pointer font-[500] ${activeTab === 0 && 'text-primary'}`} onClick={() => setActiveTab(0)}>Descriiption</span>
-              <span className={`link text-[17px] cursor-pointer font-[500] ${activeTab === 1 && 'text-primary'}`} onClick={() => setActiveTab(1)}>Product Details</span>
-              <span className={`link text-[17px] cursor-pointer font-[500] ${activeTab === 2 && 'text-primary'}`} onClick={() => setActiveTab(2)}>Reviews (5)</span>
-
-            </div>
-
-            {
-              activeTab === 0 && (
-
-                <div className='shadow-md w-full px-5 py-8 rounded-md '>
-                  <p>Studio Design' PolyFaune collection features classic products with colorful patterns, inspired by the traditional japanese origamis. To wear with a chino or jeans. The sublimation textile printing process provides an exceptional color rendering and a color, guaranteed overtime.</p>
-                  <h4>Packaging & Delivery</h4>
-                  <p>Less lion goodness that euphemistically robin expeditiously bluebird smugly scratched far while thus cackled sheepishly rigid after due one assenting regarding censorious while occasional or this more crane went more as this less much amid overhung anathematic because much held one exuberantly sheep goodness so where rat wry well concomitantly.</p>
-                  <h4>Suggested Use</h4>
-                  <p>Less lion goodness that euphemistically robin expeditiously bluebird smugly scratched far while thus cackled sheepishly rigid after due one assenting regarding censorious while occasional or this more crane went more as this less much amid overhung anathematic because much held one exuberantly sheep goodness so where rat wry well concomitantly.</p>
-                  <h4>Suggested Use</h4>
-                  <p>Studio Design' PolyFaune collection features classic products with colorful patterns, inspired by the traditional japanese origamis. </p>
-
-                </div>
-              )
-            }
-
-            {
-              activeTab === 1 && (
-
-                <div className='shadow-md w-full px-5 py-8 rounded-md '>
-                  <div class="relative overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-700">
-                      <thead class="text-xs text-gray-900 uppercase bg-gray-100">
-                        <tr>
-                          <th scope="col" class="px-6 py-3">
-                            Product name
-                          </th>
-                          <th scope="col" class="px-6 py-3">
-                            Color
-                          </th>
-                          <th scope="col" class="px-6 py-3">
-                            Category
-                          </th>
-                          <th scope="col" class="px-6 py-3">
-                            Price
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr class="bg-white">
-                          <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            Apple MacBook Pro 17"
-                          </th>
-                          <td class="px-6 py-4">Silver</td>
-                          <td class="px-6 py-4">Laptop</td>
-                          <td class="px-6 py-4">$2999</td>
-                        </tr>
-                        <tr class="bg-white">
-                          <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            Microsoft Surface Pro
-                          </th>
-                          <td class="px-6 py-4">White</td>
-                          <td class="px-6 py-4">Laptop PC</td>
-                          <td class="px-6 py-4">$1999</td>
-                        </tr>
-                        <tr class="bg-white">
-                          <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            Magic Mouse 2
-                          </th>
-                          <td class="px-6 py-4">Black</td>
-                          <td class="px-6 py-4">Accessories</td>
-                          <td class="px-6 py-4">$99</td>
-                        </tr>
-                      </tbody>
-                    </table>
+        <section className='bg-white py-5 mt-4 rounded-lg shadow-sm'>
+          <div className="container">
+            <div className="flex flex-col lg:flex-row items-start gap-8">
+              {/* Product Images */}
+              <div className="productZoomContainer w-full lg:w-[45%]">
+                {product.images && product.images.length > 0 ? (
+                  <ProductZoom product={product} />
+                ) : (
+                  <div className="bg-gray-100 rounded-lg h-[500px] flex items-center justify-center">
+                    <span className="text-gray-500">No images available</span>
                   </div>
-                </div>
+                )}
+              </div>
 
-              )
-            }
+              {/* Product Details */}
+              <div className="productContent w-full lg:w-[55%] lg:pr-10">
+                <ProductDetailsComponent product={product} />
+              </div>
+            </div>
 
-            {
-              activeTab === 2 && (
-                <div className='shadow-md w-full px-5 py-8 rounded-md '>
-                  <div className='w-full productReviewContainer'>
-                    <h2 className='text-[18px]'>Customer Questions and answers</h2>
-                    <div className="reviewScroll w-full max-h-[300px] overflow-y-scroll overflow-x-hidden mt-5 pr-5">
-                      <div className="review pt-5 border-b border-[rgba(0,0,0,0.1)] w-full flex items-center justify-between ">
-                        <div className="info w-[60%] flex items-center gap-2">
-                          <div className="img w-[80px] h-[80px] overflow-hidden rounded-full">
-                            <img src='data:image/png;base64,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' alt='User Avatar' className='w-full' />
-                          </div>
+            {/* Product Tabs */}
+            <div className="mt-10 pt-8 border-t border-gray-200">
+              <div className='flex items-center gap-8 mb-6'>
+                <button 
+                  className={`text-[16px] cursor-pointer font-medium ${activeTab === 0 ? 'text-primary border-b-2 border-primary pb-2' : 'text-gray-600 hover:text-primary'}`}
+                  onClick={() => setActiveTab(0)}
+                >
+                  Description
+                </button>
+                <button 
+                  className={`text-[16px] cursor-pointer font-medium ${activeTab === 1 ? 'text-primary border-b-2 border-primary pb-2' : 'text-gray-600 hover:text-primary'}`}
+                  onClick={() => setActiveTab(1)}
+                >
+                  Product Details
+                </button>
+                <button 
+                  className={`text-[16px] cursor-pointer font-medium ${activeTab === 2 ? 'text-primary border-b-2 border-primary pb-2' : 'text-gray-600 hover:text-primary'}`}
+                  onClick={() => setActiveTab(2)}
+                >
+                  Reviews ({reviews.length})
+                </button>
+              </div>
 
-                          <div className='w-[80%]'>
-                            <h4 className='text-[16px]'>John Doe</h4>
-                            <h5 className='text-[13px] mb-0'>2022-4-8</h5>
-
-                            <p className='text-gray-500 text-[14px] mt-0 mb-0'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.</p>
-                          </div>
-
-                          <Rating name="size-small" defaultValue={4} readOnly />
-
-                        </div>
-                      </div>
-
-
-                      <div className="review pt-5 border-b border-[rgba(0,0,0,0.1)] w-full flex items-center justify-between ">
-                        <div className="info w-[60%] flex items-center gap-2">
-                          <div className="img w-[80px] h-[80px] overflow-hidden rounded-full">
-                            <img src='data:image/png;base64,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' alt='User Avatar' className='w-full' />
-                          </div>
-
-                          <div className='w-[80%]'>
-                            <h4 className='text-[16px]'>John Doe</h4>
-                            <h5 className='text-[13px] mb-0'>2022-4-8</h5>
-
-                            <p className='text-gray-500 text-[14px] mt-0 mb-0'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.</p>
-                          </div>
-
-                          <Rating name="size-small" defaultValue={4} readOnly />
-
-                        </div>
-
-                      </div>
-
-                      <br />
-
-                      <div className="reviewForm bg-[#fafafa] p-5 rounded-lg">
-                        <h2>Add a Review</h2>
-                        <form className='flex flex-col gap-3 mt-3'>
-                          <TextField
-                            id="outlined-multiline-flexible"
-                            label="Write a review..."
-                            multiline
-                            rows={5}
-                            className='w-full'
-                          />
-                          <Rating name="size-small" defaultValue={4} />
-
-                          <div className="flex items-center gap-3 mt-3">
-                            <Button className='btn-org'>Submit review</Button>
-                          </div>
-                        </form>
-                      </div>
-
-                    </div>
-
+              {/* Description Tab */}
+              {activeTab === 0 && (
+                <div className='bg-gray-50 p-6 rounded-lg'>
+                  <h4 className="text-xl font-semibold mb-4 text-gray-800">Product Description</h4>
+                  <div className="prose max-w-none text-gray-700">
+                    {product.description ? (
+                      <p className="mb-4">{product.description}</p>
+                    ) : (
+                      <p className="text-gray-500 italic">No description available for this product.</p>
+                    )}
+                    
+                    <h5 className="font-semibold mt-6 mb-2 text-gray-800">Packaging & Delivery</h5>
+                    <p className="mb-4">
+                      We take great care in packaging your items to ensure they arrive in perfect condition. 
+                      Standard delivery takes 3-5 business days, with express options available.
+                    </p>
+                    
+                    <h5 className="font-semibold mt-6 mb-2 text-gray-800">Suggested Use</h5>
+                    <p className="mb-4">
+                      This product is designed for everyday use. Follow care instructions for best results.
+                      {product.productWeight && product.productWeight.length > 0 && (
+                        <span> Weight: {product.productWeight.join(', ')}</span>
+                      )}
+                      {product.size && (
+                        <span> | Size: {product.size}</span>
+                      )}
+                      {product.productRam && (
+                        <span> | RAM: {product.productRam}</span>
+                      )}
+                    </p>
                   </div>
                 </div>
               )}
 
+              {/* Product Details Tab */}
+              {activeTab === 1 && (
+                <div className='bg-gray-50 p-6 rounded-lg'>
+                  <h4 className="text-xl font-semibold mb-4 text-gray-800">Product Specifications</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left text-gray-700 bg-white rounded-lg overflow-hidden">
+                      <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                          <th scope="col" className="px-6 py-3">Specification</th>
+                          <th scope="col" className="px-6 py-3">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-white border-b hover:bg-gray-50">
+                          <td className="px-6 py-4 font-medium text-gray-900">Product Name</td>
+                          <td className="px-6 py-4">{product.name}</td>
+                        </tr>
+                        {product.brand && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Brand</td>
+                            <td className="px-6 py-4">{product.brand}</td>
+                          </tr>
+                        )}
+                        {product.category?.name && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Category</td>
+                            <td className="px-6 py-4">{product.category.name}</td>
+                          </tr>
+                        )}
+                        {product.subCat && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Sub Category</td>
+                            <td className="px6 py-4">{product.subCat}</td>
+                          </tr>
+                        )}
+                        <tr className="bg-white border-b hover:bg-gray-50">
+                          <td className="px-6 py-4 font-medium text-gray-900">Price</td>
+                          <td className="px-6 py-4">
+                            <span className="text-primary font-semibold">Rs.{product.price?.toFixed(2) || '0.00'}</span>
+                            {product.oldePrice && product.oldePrice > product.price && (
+                              <span className="ml-2 line-through text-gray-500">Rs.{product.oldePrice.toFixed(2)}</span>
+                            )}
+                          </td>
+                        </tr>
+                        <tr className="bg-white border-b hover:bg-gray-50">
+                          <td className="px-6 py-4 font-medium text-gray-900">Stock Status</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-sm ${product.countInStock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'} ({product.countInStock || 0})
+                            </span>
+                          </td>
+                        </tr>
+                        {product.size && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Size</td>
+                            <td className="px-6 py-4">{product.size}</td>
+                          </tr>
+                        )}
+                        {product.productRam && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">RAM</td>
+                            <td className="px-6 py-4">{product.productRam}</td>
+                          </tr>
+                        )}
+                        {product.productWeight && product.productWeight.length > 0 && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Weight</td>
+                            <td className="px-6 py-4">{product.productWeight.join(', ')}</td>
+                          </tr>
+                        )}
+                        {product.discount > 0 && (
+                          <tr className="bg-white border-b hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Discount</td>
+                            <td className="px-6 py-4 text-red-600 font-semibold">{product.discount}%</td>
+                          </tr>
+                        )}
+                        {product.rating > 0 && (
+                          <tr className="bg-white hover:bg-gray-50">
+                            <td className="px-6 py-4 font-medium text-gray-900">Rating</td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <Rating value={product.rating} precision={0.5} readOnly size="small" />
+                                <span className="text-gray-600">({product.rating})</span>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
-          </div>
+              {/* Reviews Tab */}
+              {activeTab === 2 && (
+                <div className='bg-gray-50 p-6 rounded-lg'>
+                  <h4 className="text-xl font-semibold mb-4 text-gray-800">Customer Reviews ({reviews.length})</h4>
+                  
+                  <div className="space-y-6 mb-8">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+                              <img 
+                                src={review.avatar} 
+                                alt={review.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <h5 className="font-semibold text-gray-800">{review.name}</h5>
+                              <p className="text-sm text-gray-500">{review.date}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Rating value={review.rating} readOnly size="small" />
+                            <span className="text-sm text-gray-600">{review.rating}.0</span>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-gray-700">{review.comment}</p>
+                      </div>
+                    ))}
+                  </div>
 
-          <div className="container pt-5">
-            <h3 className='text-[20px] font-[600] pb-0'>Related Products</h3>
-            <ProductSlider items={5} />
+                  {/* Add Review Form */}
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                    <h5 className="text-lg font-semibold mb-4 text-gray-800">Add Your Review</h5>
+                    <form onSubmit={handleReviewSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Your Rating
+                        </label>
+                        <Rating
+                          value={newReview.rating}
+                          onChange={(event, newValue) => {
+                            setNewReview({...newReview, rating: newValue});
+                          }}
+                          size="large"
+                        />
+                      </div>
+                      <div>
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={4}
+                          label="Your Review"
+                          value={newReview.comment}
+                          onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                          variant="outlined"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          className="btn-org"
+                          disabled={!context.isLogin}
+                        >
+                          {context.isLogin ? 'Submit Review' : 'Login to Review'}
+                        </Button>
+                      </div>
+                      {!context.isLogin && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          Please <Link to="/login" className="text-primary hover:underline">login</Link> to submit a review.
+                        </p>
+                      )}
+                    </form>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Related Products */}
+            {relatedProducts.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <h3 className='text-2xl font-semibold mb-6 text-gray-800'>Related Products</h3>
+                <ProductSlider 
+                  products={relatedProducts}
+                  items={4}
+                  autoplay={false}
+                />
+              </div>
+            )}
           </div>
         </section>
-
-
       </div>
     </>
   )
 }
 
-export default ProductDetails
+export default ProductDetails;

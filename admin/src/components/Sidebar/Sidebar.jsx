@@ -11,6 +11,8 @@ import { IoIosLogOut } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa";
 import { Collapse } from 'react-collapse';
 import { MyContext } from '../../App';
+import AddHomeSlide from '../../Pages/HomeSliderBanners/addHomeSlide';
+import HomeSliderBanners from '../../Pages/HomeSliderBanners/HomeSliderBanners';
 
 
 const Sidebar = () => {
@@ -57,13 +59,13 @@ const Sidebar = () => {
                     <Collapse isOpened={submenuIndex === 1} className='w-full'>
                         <ul className='w-full pl-4 mt-2 list-none'>
                             <li className='w-full'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                            <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3' onClick={() => context.setIsOpenFullScreenPanel({ open: true, model: 'Home Slider Banners' })}>
                                     <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
                                     Home Banner List
                                 </Button>
                             </li>
                             <li className='w-full'>
-                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3'>
+                                <Button className='!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !font-[500] !pl-9 flex gap-3' onClick={() => context.setIsOpenFullScreenPanel({ open: true, model: 'Add Home Slide' })}>
                                     <span className='block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)] '></span>
                                     Add Home Banner Slide
                                 </Button>

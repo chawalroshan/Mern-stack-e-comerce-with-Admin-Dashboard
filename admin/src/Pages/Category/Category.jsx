@@ -1,5 +1,6 @@
+// Pages/Category/Category.jsx
 import Button from '@mui/material/Button';
-import React, { useContext, useState, useEffect } from 'react'; // ✅ Added useEffect
+import React, { useContext, useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,43 +8,33 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import { Link } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
 import Pagination from '@mui/material/Pagination';
 import { FiEdit } from "react-icons/fi";
-import { FaRegEye, FaRegTrashCan } from "react-icons/fa6";
-import SearchBox from '../../components/SearchBox/SearchBox';
+import { FaRegEye, FaRegTrashCan, FaChevronRight } from "react-icons/fa6";
 import { MyContext } from '../../App';
 import { fetchDataFromApi, deleteData } from '../../utils/api';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 const Category = () => {
-  const [categoryFilterVal, setCategoryFilterVal] = useState('');
   const [catData, setCatData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedCategories, setExpandedCategories] = useState({});
   const context = useContext(MyContext);
 
-  const handleChangeCatFilter = (event) => {
-    setCategoryFilterVal(event.target.value);
-  };
-
-  // ✅ Fetch categories on component mount
   useEffect(() => {
     fetchCategories();
   }, []);
-  
+
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const res = await fetchDataFromApi('/api/category');
       if (res && res.success) {
-        // ✅ Filter top-level categories only
-        const topCategories = (res.categories || []).filter(cat => !cat.parentId);
-        setCatData(topCategories);
+        setCatData(res.data || []); // Use nested data structure
       }
     } catch (err) {
       console.error('Failed to fetch categories:', err);
@@ -51,16 +42,21 @@ const Category = () => {
       setLoading(false);
     }
   };
-  
 
-  // ✅ Handle category deletion
+  const toggleExpand = (categoryId) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryId]: !prev[categoryId]
+    }));
+  };
+
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm('Are you sure you want to delete this category? All subcategories will also be deleted.')) {
       try {
         const res = await deleteData(`/api/category/deleteCategory/${id}`);
         if (res && res.success) {
           alert('Category deleted successfully');
-          fetchCategories(); // Refresh the list
+          fetchCategories();
         } else {
           alert('Failed to delete category');
         }
@@ -71,6 +67,104 @@ const Category = () => {
     }
   };
 
+  const renderCategoryRow = (category, depth = 0) => {
+    const hasChildren = category.children && category.children.length > 0;
+    const isExpanded = expandedCategories[category._id];
+
+    return (
+      <React.Fragment key={category._id}>
+        <TableRow hover>
+          <TableCell padding="checkbox">
+            <Checkbox {...label} size='small' />
+          </TableCell>
+          <TableCell>
+            <div className="flex items-center gap-2" style={{ paddingLeft: `${depth * 20}px` }}>
+              {hasChildren && (
+                <button
+                  onClick={() => toggleExpand(category._id)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <FaChevronRight 
+                    className={`text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
+                  />
+                </button>
+              )}
+              {!hasChildren && <div className="w-4" />}
+              <Link to={`/category/${category._id}`}>
+                <img
+                  src={category.images?.[0] || 'https://via.placeholder.com/150'}
+                  alt={category.name}
+                  className="w-[100px] h-[50px] object-contain rounded-md hover:scale-105 transition"
+                />
+              </Link>
+            </div>
+          </TableCell>
+          <TableCell>
+            <div style={{ paddingLeft: `${depth * 20}px` }}>
+              {category.name}
+              <span className="text-xs text-gray-500 ml-2">
+                (Level {category.level})
+              </span>
+            </div>
+          </TableCell>
+          <TableCell align="right">
+            <div className="flex items-center justify-end gap-2">
+              <Tooltip title={`Add ${getNextLevelName(category.level)}`}>
+                <Button 
+                  onClick={() => context.setIsOpenFullScreenPanel({ 
+                    open: true, 
+                    model: `Add New Sub Category`,
+                    parentId: category._id 
+                  })}
+                  sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#f0f8ff', p: 0 }}
+                >
+                  <FaPlus className='text-[14px] text-blue-600' />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Edit Category">
+                <Link to={`/category/edit/${category._id}`}>
+                  <Button sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#fefefe', p: 0 }}>
+                    <FiEdit className='text-[18px] text-gray-800' />
+                  </Button>
+                </Link>
+              </Tooltip>
+              <Tooltip title="View Category">
+                <Link to={`/category/${category._id}`}>
+                  <Button sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#fefefe', p: 0 }}>
+                    <FaRegEye className='text-[18px] text-gray-800' />
+                  </Button>
+                </Link>
+              </Tooltip>
+              <Tooltip title="Delete Category">
+                <Button 
+                  onClick={() => handleDelete(category._id)}
+                  sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#fefefe', p: 0 }}
+                >
+                  <FaRegTrashCan className='text-[18px] text-red-600' />
+                </Button>
+              </Tooltip>
+            </div>
+          </TableCell>
+        </TableRow>
+        
+        {/* Render children if expanded */}
+        {hasChildren && isExpanded && category.children.map(child => 
+          renderCategoryRow(child, depth + 1)
+        )}
+      </React.Fragment>
+    );
+  };
+
+  const getNextLevelName = (currentLevel) => {
+    const levelNames = {
+      1: 'Subcategory',
+      2: 'Sub-subcategory',
+      3: 'Child Category',
+      4: 'Child Category'
+    };
+    return levelNames[currentLevel] || 'Child Category';
+  };
+
   return (
     <>
       <div className='flex flex-col md:flex-row items-start md:items-center justify-between px-2 py-3 gap-3'>
@@ -79,7 +173,11 @@ const Category = () => {
           <Button className='!bg-green-600 !text-white px-4 py-1 rounded'>Export</Button>
           <Button
             className='btn-blue btn-sm'
-            onClick={() => context.setIsOpenFullScreenPanel({ open: true, model: 'Add New Category' })}
+            onClick={() => context.setIsOpenFullScreenPanel({ 
+              open: true, 
+              model: 'Add New Category',
+              level: 1 
+            })}
           >
             <FaPlus className='mr-2' /> Add New Category
           </Button>
@@ -113,53 +211,7 @@ const Category = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                catData.map((cat) => ( // ✅ Map actual category data
-                  <TableRow hover key={cat._id}>
-                    <TableCell padding="checkbox">
-                      <Checkbox {...label} size='small' />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-4">
-                        <Link to={`/category/${cat._id}`}>
-                          <img
-                            src={cat.images?.[0] || 'https://via.placeholder.com/150'} // ✅ Use actual image
-                            alt={cat.name}
-                            className="w-[100px] h-[50px] object-cover rounded-md hover:scale-105 transition"
-                          />
-                        </Link>
-                      </div>
-                    </TableCell>
-                    <TableCell>{cat.name}</TableCell> {/* ✅ Show actual category name */}
-                    <TableCell align="right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Tooltip title="Edit Category">
-                          <Link to={`/category/edit/${cat._id}`}>
-                            <Button 
-                            // onClick={() => context.setIsOpenFullScreenPanel({ open: true, model: 'Edit Category' })}
-                             sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#fefefe', p: 0 }}>
-                              <FiEdit className='text-[18px] text-gray-800' />
-                            </Button>
-                          </Link>
-                        </Tooltip>
-                        <Tooltip title="View Category">
-                          <Link to={`/category/${cat._id}`}>
-                            <Button sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#fefefe', p: 0 }}>
-                              <FaRegEye className='text-[18px] text-gray-800' />
-                            </Button>
-                          </Link>
-                        </Tooltip>
-                        <Tooltip title="Delete Category">
-                          <Button 
-                            onClick={() => handleDelete(cat._id)}
-                            sx={{ minWidth: 30, width: 30, height: 30, borderRadius: '50%', background: '#fefefe', p: 0 }}
-                          >
-                            <FaRegTrashCan className='text-[18px] text-red-600' />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                catData.map(category => renderCategoryRow(category))
               )}
             </TableBody>
           </Table>
