@@ -143,3 +143,50 @@ export async function deleteImages(url, data = {}) {
   }
 }
 
+// ========== ORDER API FUNCTIONS ==========
+
+export async function getAdminOrders() {
+  try {
+    const response = await axios.get(apiUrl + '/api/orders/admin-orders', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching admin orders:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function updateOrderStatus(orderId, orderStatus) {
+  try {
+    const response = await axios.put(apiUrl + `/api/orders/${orderId}/status`, {
+      orderStatus
+    }, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error updating order status:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}

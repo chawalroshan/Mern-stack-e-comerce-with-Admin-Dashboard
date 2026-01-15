@@ -19,6 +19,7 @@ import Verify from './Pages/Verify/Verify'
 import toast, { Toaster } from 'react-hot-toast';
 import ForgetPassword from './Pages/ForgetPassword/Forgetpassword'
 import Checkout from './Pages/Checkout/Checkout'
+import EsewaPayment from './Pages/Payment/EsewaPayment'
 import MyAccount from './Pages/MyAccount/MyAccount'
 import MyList from './Pages/MyList/MyList'
 import Orders from './Pages/Orders/Orders'
@@ -978,9 +979,11 @@ function App() {
             <Route path='/verify' element={<Verify />} />
             <Route path='/forgot-password' element={<ForgetPassword />} />
             <Route path='/checkout' element={<Checkout />} />
+            <Route path='/payment/esewa/:paymentId' element={<EsewaPayment />} />
             <Route path='/my-account' element={<MyAccount />} />
             <Route path='/my-list' element={<MyList />} />
             <Route path='/orders' element={<Orders />} />
+            <Route path='/orders/:id' element={<Orders />} />
             <Route path='/address' element={<Address />} />
           </Routes>
           <Footer />

@@ -386,3 +386,208 @@ export async function getMyList() {
     };
   }
 }
+
+// ========== ORDER API FUNCTIONS ==========
+
+export async function placeOrder(orderData) {
+  try {
+    const response = await axios.post(apiUrl + '/api/orders/place', orderData, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error placing order:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function getUserOrders() {
+  try {
+    const response = await axios.get(apiUrl + '/api/orders/user-orders', {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching user orders:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function getOrderById(orderId) {
+  try {
+    const response = await axios.get(apiUrl + `/api/orders/${orderId}`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching order:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+// ========== PAYMENT API FUNCTIONS ==========
+
+export async function initiateEsewaPayment(orderId) {
+  try {
+    const response = await axios.post(apiUrl + '/api/payment/esewa/initiate', {
+      orderId
+    }, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error initiating eSewa payment:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function esewaPaymentSuccess(orderId, paymentId) {
+  try {
+    const response = await axios.post(apiUrl + '/api/payment/esewa/success', {
+      orderId,
+      paymentId
+    }, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error processing eSewa payment success:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function esewaPaymentFailure(orderId, paymentId, reason) {
+  try {
+    const response = await axios.post(apiUrl + '/api/payment/esewa/failure', {
+      orderId,
+      paymentId,
+      reason
+    }, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error processing eSewa payment failure:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+// ========== NOTIFICATION API FUNCTIONS ==========
+
+export async function getUserNotifications() {
+  try {
+    const response = await axios.get(apiUrl + '/api/notifications/user', {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching notifications:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function markNotificationRead(notificationId) {
+  try {
+    const response = await axios.put(apiUrl + `/api/notifications/${notificationId}/read`, {}, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error marking notification as read:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function markAllNotificationsRead() {
+  try {
+    const response = await axios.put(apiUrl + '/api/notifications/read-all', {}, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error marking all notifications as read:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
+
+export async function getUnreadNotificationCount() {
+  try {
+    const response = await axios.get(apiUrl + '/api/notifications/unread-count', {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    console.error('Error fetching unread notification count:', error);
+    return {
+      success: false,
+      error: true,
+      message: 'Something went wrong'
+    };
+  }
+}
