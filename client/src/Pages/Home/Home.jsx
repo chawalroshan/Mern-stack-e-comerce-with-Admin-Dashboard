@@ -12,12 +12,13 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Navigation } from 'swiper/modules';
 import BlogItem from '../../components/BlogItem/BlogItem';
-import PersonalizedRecommendations from '../components/recommendations/PersonalizedRecommendations';
+import PersonalizedRecommendations from '../../components/recommendeation/PersonalizedRecommendations';
 import { MyContext } from '../../App';
 
 const Home = () => {
   const [value, setValue] = useState(0);
   const context = useContext(MyContext);
+  const userData = context?.userData || {};
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
