@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
-import { getOrderById } from '../utils/api';
+import { getOrderById } from '../../utils/api';
 import { Button } from '@mui/material';
+import { MyContext } from '../../App';
 
 const PaymentSuccess = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const context = useContext(MyContext);
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -15,27 +17,55 @@ const PaymentSuccess = () => {
         const orderId = queryParams.get('orderId');
         const transactionId = queryParams.get('transactionId');
 
+        console.log('Payment Success Page - OrderID:', orderId);
+        console.log('Payment Success Page - TransactionID:', transactionId);
+
         if (orderId) {
             fetchOrderDetails(orderId);
         } else {
-            // If no orderId in URL, check session storage or redirect
+            // If no orderId in URL, check session storage
             const savedOrderId = sessionStorage.getItem('lastOrderId');
             if (savedOrderId) {
                 fetchOrderDetails(savedOrderId);
             } else {
                 setLoading(false);
+                context.openAlertBox && context.openAlertBox({
+                    type: 'warning',
+                    msg: 'Order details not found'
+                });
             }
         }
+
+        // Clear session storage after loading
+        sessionStorage.removeItem('lastOrderId');
+        sessionStorage.removeItem('lastOrderNumber');
     }, [location]);
 
     const fetchOrderDetails = async (orderId) => {
         try {
             const response = await getOrderById(orderId);
+            console.log('Order details response:', response);
+            
             if (response.success) {
                 setOrder(response.data);
+                
+                // Show success message
+                context.openAlertBox && context.openAlertBox({
+                    type: 'success',
+                    msg: 'Payment completed successfully!'
+                });
+            } else {
+                context.openAlertBox && context.openAlertBox({
+                    type: 'error',
+                    msg: response.message || 'Failed to fetch order details'
+                });
             }
         } catch (error) {
             console.error('Error fetching order:', error);
+            context.openAlertBox && context.openAlertBox({
+                type: 'error',
+                msg: 'Error loading order details'
+            });
         } finally {
             setLoading(false);
         }
@@ -70,9 +100,14 @@ const PaymentSuccess = () => {
                         <div className="text-left space-y-2">
                             <p><span className="font-medium">Order Number:</span> {order.orderId}</p>
                             <p><span className="font-medium">Total Amount:</span> Rs. {order.totalAmount?.toFixed(2)}</p>
-                            <p><span className="font-medium">Status:</span> 
-                                <span className="text-green-600 font-semibold ml-2">
-                                    {order.paymentStatus === 'paid' ? 'Paid' : 'Processing'}
+                            <p><span className="font-medium">Payment Status:</span> 
+                                <span className="text-green-600 font-semibold ml-2 capitalize">
+                                    {order.paymentStatus || 'Paid'}
+                                </span>
+                            </p>
+                            <p><span className="font-medium">Order Status:</span> 
+                                <span className="text-blue-600 font-semibold ml-2 capitalize">
+                                    {order.orderStatus || 'Confirmed'}
                                 </span>
                             </p>
                         </div>
@@ -80,8 +115,7 @@ const PaymentSuccess = () => {
                 ) : (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                         <p className="text-yellow-800">
-                            Order details not found, but payment was successful. 
-                            Please check your email for confirmation.
+                            Payment was successful! Please check your email for order confirmation.
                         </p>
                     </div>
                 )}
@@ -99,6 +133,14 @@ const PaymentSuccess = () => {
                     
                     <Button
                         variant="outlined"
+                        className="w-full !py-3 !border-primary !text-primary hover:!bg-primary hover:!text-white"
+                        onClick={() => navigate('/orders')}
+                    >
+                        View All Orders
+                    </Button>
+                    
+                    <Button
+                        variant="text"
                         className="w-full !py-3"
                         onClick={() => navigate('/')}
                     >
@@ -106,9 +148,11 @@ const PaymentSuccess = () => {
                     </Button>
                 </div>
 
-                <p className="text-sm text-gray-500 mt-6">
-                    You will receive an email confirmation shortly.
-                </p>
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        📧 You will receive an email confirmation shortly with your order details.
+                    </p>
+                </div>
             </div>
         </div>
     );

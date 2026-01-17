@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { Navigation } from 'swiper/modules';
 import BlogItem from '../../components/BlogItem/BlogItem';
+import PersonalizedRecommendations from '../components/recommendations/PersonalizedRecommendations';
 import { MyContext } from '../../App';
 
 const Home = () => {
@@ -85,6 +86,15 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      <section className="py-12 bg-gray-50">
+                <div className="container mx-auto px-4">
+                    <PersonalizedRecommendations 
+                        userId={userData?._id}
+                        title="Recommended For You"
+                    />
+                </div>
+            </section>
 
       {/* Free Shipping Section */}
       <section className="py-8 bg-[#f5f5f5]">

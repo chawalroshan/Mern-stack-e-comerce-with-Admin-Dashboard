@@ -173,25 +173,60 @@ const Checkout = () => {
                 const orderNumber = orderResponse.order?.orderId || orderResponse.data?.orderId;
                 setOrderId(createdOrderId);
                 
-                // If payment method is eSewa, redirect to payment page
+                // If payment method is eSewa, submit directly to eSewa
                 if (formData.paymentMethod === 'esewa') {
-                    // Initiate eSewa payment
-                    const paymentResponse = await initiateEsewaPayment(createdOrderId);
-                    
-                    if (paymentResponse.success) {
-                        // Store order ID in session storage for payment success page
-                        sessionStorage.setItem('lastOrderId', createdOrderId);
+                    try {
+                        // Initiate eSewa payment
+                        const paymentResponse = await initiateEsewaPayment(createdOrderId);
                         
-                        // Redirect to eSewa payment page
-                        navigate('/EsewaPaymentForm', {
-                            state: {
-                                orderId: createdOrderId,
-                                orderNumber: orderNumber,
-                                amount: grandTotal
-                            }
+                        if (paymentResponse.success && paymentResponse.data) {
+                            // Store order ID in session storage for payment success page
+                            sessionStorage.setItem('lastOrderId', createdOrderId);
+                            sessionStorage.setItem('lastOrderNumber', orderNumber);
+                            
+                            console.log('eSewa Payment URL:', paymentResponse.data.paymentUrl);
+                            console.log('eSewa Payment Data:', paymentResponse.data.paymentData);
+                            
+                            // Create and submit form directly to eSewa
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = paymentResponse.data.paymentUrl;
+                            form.style.display = 'none';
+                            form.target = '_self'; // Submit in same window
+                            
+                            // Add all payment data as hidden inputs
+                            Object.entries(paymentResponse.data.paymentData).forEach(([key, value]) => {
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = key;
+                                input.value = String(value); // Ensure value is string
+                                form.appendChild(input);
+                                console.log(`Added field: ${key} = ${value}`);
+                            });
+                            
+                            // Add form to body and submit
+                            document.body.appendChild(form);
+                            console.log('Submitting form to eSewa...');
+                            
+                            // Submit form - this will redirect to eSewa
+                            form.submit();
+                            
+                            // Clear cart after initiating payment
+                            context.clearCart();
+                        } else {
+                            context.openAlertBox({
+                                type: 'error',
+                                msg: paymentResponse.message || 'Failed to initiate payment'
+                            });
+                            setLoading(false);
+                        }
+                    } catch (paymentError) {
+                        console.error('Error initiating eSewa payment:', paymentError);
+                        context.openAlertBox({
+                            type: 'error',
+                            msg: 'Error initiating payment. Please try again.'
                         });
-                    } else {
-                        toast.error(paymentResponse.message || 'Failed to initiate payment');
+                        setLoading(false);
                     }
                 } 
                 // If payment method is COD

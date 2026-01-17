@@ -17,6 +17,7 @@ import homeSliderRouter from './routes/homeSlider.route.js';
 import orderRouter from './routes/order.route.js';
 import notificationRouter from './routes/notification.route.js';
 import paymentRouter from './routes/payment.route.js';
+import recommendationRouter from './routes/recommendation.route.js';
 
 
 const PORT = process.env.PORT || 8000; 
@@ -61,6 +62,7 @@ app.use('/api/homeSlider',homeSliderRouter)
 app.use('/api/orders', orderRouter)
 app.use('/api/notifications', notificationRouter)
 app.use('/api/payment', paymentRouter)
+app.use('/api/recommendations', recommendationRouter);
 
 connectDB().then(() => {
     app.listen(PORT, () => {

@@ -591,3 +591,77 @@ export async function getUnreadNotificationCount() {
     };
   }
 }
+
+
+export async function getPersonalizedRecommendations(type = 'personalized', limit = 12) {
+  try {
+      const response = await axios.get(apiUrl + `/api/recommendations/personalized`, {
+          headers: getAuthHeaders(),
+          params: { type, limit }
+      });
+      return response.data;
+  } catch (error) {
+      if (error.response && error.response.data) {
+          return error.response.data;
+      }
+      return {
+          success: false,
+          error: true,
+          message: 'Something went wrong'
+      };
+  }
+}
+
+// Track user interaction
+export async function trackUserInteraction(productId, interactionType) {
+  try {
+      const response = await axios.post(apiUrl + '/api/recommendations/track', {
+          productId,
+          interactionType
+      }, {
+          headers: getAuthHeaders()
+      });
+      return response.data;
+  } catch (error) {
+      console.error('Error tracking interaction:', error);
+      return { success: false };
+  }
+}
+
+// Get similar products
+export async function getSimilarProducts(productId) {
+  try {
+      const response = await axios.get(apiUrl + `/api/recommendations/similar/${productId}`, {
+          headers: getAuthHeaders()
+      });
+      return response.data;
+  } catch (error) {
+      if (error.response && error.response.data) {
+          return error.response.data;
+      }
+      return {
+          success: false,
+          error: true,
+          message: 'Something went wrong'
+      };
+  }
+}
+
+// Get frequently bought together
+export async function getFrequentlyBoughtTogether(productId) {
+  try {
+      const response = await axios.get(apiUrl + `/api/recommendations/frequently-bought/${productId}`, {
+          headers: getAuthHeaders()
+      });
+      return response.data;
+  } catch (error) {
+      if (error.response && error.response.data) {
+          return error.response.data;
+      }
+      return {
+          success: false,
+          error: true,
+          message: 'Something went wrong'
+      };
+  }
+}
